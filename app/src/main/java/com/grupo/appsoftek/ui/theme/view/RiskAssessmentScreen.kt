@@ -2,6 +2,7 @@ package com.grupo.appsoftek.ui.theme.view
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -72,7 +73,7 @@ private val sampleSections = listOf(
 )
 
 @Composable
-fun RiskAssessmentScreen(sections: List<Section> = sampleSections) {
+fun RiskAssessmentScreen(sections: List<Section> = sampleSections, onSectionClick: (String) -> Unit = {}) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -117,20 +118,27 @@ fun RiskAssessmentScreen(sections: List<Section> = sampleSections) {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(sections) { section ->
-                SectionCard(section)
+                SectionCard(
+                    section = section,
+                    onClick = { onSectionClick(section.title) }
+                )
             }
         }
     }
 }
 
 @Composable
-private fun SectionCard(section: Section) {
+private fun SectionCard(
+    section: Section,
+    onClick: () -> Unit
+) {
     Card(
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = section.cardColor),
         modifier = Modifier
             .fillMaxWidth()
             .height(80.dp)
+            .clickable(onClick = onClick) // Adicionando clickable
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
