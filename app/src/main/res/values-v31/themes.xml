@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.AppSoftek.Splash" parent="Theme.SplashScreen">
+        <!-- cor de fundo da splash -->
+        <item name="android:windowSplashScreenBackground">@color/white</item>
+        <!-- drawable (estático ou animado) a mostrar -->
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/launch_screen</item>
+        <!-- opcional: duração da animação em milissegundos -->
+        <item name="android:windowSplashScreenAnimationDuration">300</item>
+        <!-- depois que a splash acabar, aplica esse tema -->
+        <item name="postSplashScreenTheme">@style/Theme.AppSoftek</item>
+    </style>
+</resources>
