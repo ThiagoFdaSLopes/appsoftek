@@ -59,6 +59,8 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    // Adicionado ViewModel LifyCicle
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
     // Retrofit e Gson
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.gson)
