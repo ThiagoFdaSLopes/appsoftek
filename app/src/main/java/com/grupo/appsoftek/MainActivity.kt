@@ -1,4 +1,4 @@
-package com.grupo.appsoftek
+gpackage com.grupo.appsoftek
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
