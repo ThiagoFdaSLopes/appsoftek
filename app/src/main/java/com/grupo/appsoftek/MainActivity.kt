@@ -36,10 +36,13 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.grupo.appsoftek.ui.theme.AppSoftekTheme
 import com.grupo.appsoftek.ui.theme.view.MoodTrackingScreen
+import com.grupo.appsoftek.ui.theme.view.ProductivityQuestionScreen
 import com.grupo.appsoftek.ui.theme.view.ResourcesScreen
 import com.grupo.appsoftek.ui.theme.view.SectionDetailScreen
 import com.grupo.appsoftek.ui.theme.view.SupportScreen
 import com.grupo.appsoftek.ui.theme.view.RiskAssessmentScreen
+import com.grupo.appsoftek.ui.theme.view.WorkloadQuestionScreen
+import android.widget.Toast
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,6 +69,12 @@ sealed class Screen(val route: String, val title: String, val icon: Int) {
     object SectionDetail : Screen("section/{sectionTitle}", "Detalhe", R.drawable.softtek_logo) {
         fun createRoute(sectionTitle: String) = "section/$sectionTitle"
     }
+
+    // Rota para a tela de perguntas sobre carga de trabalho
+    object WorkloadQuestions : Screen("workload", "Carga de Trabalho", R.drawable.softtek_logo)
+
+    // Nova rota para a tela de perguntas sobre produtividade
+    object ProductivityQuestions : Screen("productivity", "Produtividade", R.drawable.softtek_logo)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -101,6 +110,8 @@ fun AppNavigation() {
             currentRoute == Screen.MoodTracking.route -> Screen.MoodTracking.title
             currentRoute == Screen.Resources.route -> Screen.Resources.title
             currentRoute == Screen.Support.route -> Screen.Support.title
+            currentRoute == Screen.WorkloadQuestions.route -> Screen.WorkloadQuestions.title
+            currentRoute == Screen.ProductivityQuestions.route -> Screen.ProductivityQuestions.title
             else -> ""
         }
     }
@@ -157,6 +168,8 @@ fun AppNavigation() {
                     onSectionClick = { sectionTitle ->
                         when (sectionTitle) {
                             "Bem-estar emocional" -> navController.navigate(Screen.MoodTracking.route)
+                            "Carga de trabalho" -> navController.navigate(Screen.WorkloadQuestions.route)
+                            "Produtividade" -> navController.navigate(Screen.ProductivityQuestions.route)
                             else -> navController.navigate(Screen.SectionDetail.createRoute(sectionTitle))
                         }
                     }
@@ -175,6 +188,40 @@ fun AppNavigation() {
 
             composable(Screen.Support.route) {
                 SupportScreen()
+            }
+
+            // Rota para a tela de perguntas sobre carga de trabalho
+            composable(Screen.WorkloadQuestions.route) {
+                WorkloadQuestionScreen(
+                    onBackPressed = { navController.popBackStack() },
+                    onFinished = { answers ->
+                        // Aqui você pode salvar as respostas ou navegar para outra tela
+                        navController.popBackStack()
+                        // Você pode querer avisar o usuário que as respostas foram salvas
+                        Toast.makeText(
+                            navController.context,
+                            "Respostas sobre carga de trabalho salvas",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                )
+            }
+
+            // Nova rota para a tela de perguntas sobre produtividade
+            composable(Screen.ProductivityQuestions.route) {
+                ProductivityQuestionScreen(
+                    onBackPressed = { navController.popBackStack() },
+                    onFinished = { answers ->
+                        // Aqui você pode salvar as respostas ou navegar para outra tela
+                        navController.popBackStack()
+                        // Você pode querer avisar o usuário que as respostas foram salvas
+                        Toast.makeText(
+                            navController.context,
+                            "Respostas sobre produtividade salvas",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                )
             }
 
             // Rota para detalhes da seção com argumento
