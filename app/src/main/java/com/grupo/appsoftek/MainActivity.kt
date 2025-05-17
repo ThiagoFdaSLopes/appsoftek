@@ -43,6 +43,9 @@ import com.grupo.appsoftek.ui.theme.view.SupportScreen
 import com.grupo.appsoftek.ui.theme.view.RiskAssessmentScreen
 import com.grupo.appsoftek.ui.theme.view.WorkloadQuestionScreen
 import android.widget.Toast
+import com.grupo.appsoftek.ui.theme.view.ClimaQuestionScreen
+import com.grupo.appsoftek.ui.theme.view.QuestionsComunicationScreen
+import com.grupo.appsoftek.ui.theme.view.QuestionsLeadersheapScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -75,6 +78,15 @@ sealed class Screen(val route: String, val title: String, val icon: Int) {
 
     // Nova rota para a tela de perguntas sobre produtividade
     object ProductivityQuestions : Screen("productivity", "Produtividade", R.drawable.softtek_logo)
+
+    // Nova rota para a tela de perguntas sobre Clima
+    object ClimaQuestionsScreen : Screen("clima", "Clima", R.drawable.softtek_logo)
+
+    // Nova rota para a tela de perguntas sobre comunication
+    object QuestionsComunicationScreen : Screen("comunication", "Comunicação", R.drawable.softtek_logo)
+
+    // Nova rota para a tela de perguntas sobre comunication
+    object QuestionsLeadersheapScreen : Screen("liderança", "Liderança", R.drawable.softtek_logo)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -111,6 +123,9 @@ fun AppNavigation() {
             currentRoute == Screen.Resources.route -> Screen.Resources.title
             currentRoute == Screen.Support.route -> Screen.Support.title
             currentRoute == Screen.WorkloadQuestions.route -> Screen.WorkloadQuestions.title
+            currentRoute == Screen.ClimaQuestionsScreen.route -> Screen.ClimaQuestionsScreen.title
+            currentRoute == Screen.QuestionsComunicationScreen.route -> Screen.QuestionsComunicationScreen.title
+            currentRoute == Screen.QuestionsLeadersheapScreen.route -> Screen.QuestionsLeadersheapScreen.title
             currentRoute == Screen.ProductivityQuestions.route -> Screen.ProductivityQuestions.title
             else -> ""
         }
@@ -170,6 +185,9 @@ fun AppNavigation() {
                             "Bem-estar emocional" -> navController.navigate(Screen.MoodTracking.route)
                             "Carga de trabalho" -> navController.navigate(Screen.WorkloadQuestions.route)
                             "Produtividade" -> navController.navigate(Screen.ProductivityQuestions.route)
+                            "Clima" -> navController.navigate(Screen.ClimaQuestionsScreen.route)
+                            "Comunicação" -> navController.navigate(Screen.QuestionsComunicationScreen.route)
+                            "Liderança" -> navController.navigate(Screen.QuestionsLeadersheapScreen.route)
                             else -> navController.navigate(Screen.SectionDetail.createRoute(sectionTitle))
                         }
                     }
@@ -218,6 +236,57 @@ fun AppNavigation() {
                         Toast.makeText(
                             navController.context,
                             "Respostas sobre produtividade salvas",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                )
+            }
+
+            // Rota para a tela de perguntas sobre clima
+            composable(Screen.ClimaQuestionsScreen.route) {
+                ClimaQuestionScreen(
+                    onBackPressed = { navController.popBackStack() },
+                    onFinished = { answers ->
+                        // Aqui você pode salvar as respostas ou navegar para outra tela
+                        navController.popBackStack()
+                        // Você pode querer avisar o usuário que as respostas foram salvas
+                        Toast.makeText(
+                            navController.context,
+                            "Respostas sobre clima salvas",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                )
+            }
+
+            // Rota para a tela de perguntas sobre Comunicação
+            composable(Screen.QuestionsComunicationScreen.route) {
+                QuestionsComunicationScreen(
+                    onBackPressed = { navController.popBackStack() },
+                    onFinished = { answers ->
+                        // Aqui você pode salvar as respostas ou navegar para outra tela
+                        navController.popBackStack()
+                        // Você pode querer avisar o usuário que as respostas foram salvas
+                        Toast.makeText(
+                            navController.context,
+                            "Respostas sobre comunicação salvas",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                )
+            }
+
+            // Rota para a tela de perguntas sobre Liderança
+            composable(Screen.QuestionsLeadersheapScreen.route) {
+                QuestionsLeadersheapScreen(
+                    onBackPressed = { navController.popBackStack() },
+                    onFinished = { answers ->
+                        // Aqui você pode salvar as respostas ou navegar para outra tela
+                        navController.popBackStack()
+                        // Você pode querer avisar o usuário que as respostas foram salvas
+                        Toast.makeText(
+                            navController.context,
+                            "Respostas sobre liderança salvas",
                             Toast.LENGTH_SHORT
                         ).show()
                     }
