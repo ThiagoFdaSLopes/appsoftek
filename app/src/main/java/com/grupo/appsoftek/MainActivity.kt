@@ -196,7 +196,17 @@ fun AppNavigation() {
 
             composable(Screen.MoodTracking.route) {
                 MoodTrackingScreen(
-                    onBackPressed = { navController.popBackStack() }
+                    onBackPressed = { navController.popBackStack() },
+                    onFinished = { ->
+                        // Aqui você pode salvar as respostas ou navegar para outra tela
+                        navController.popBackStack()
+                        // Você pode querer avisar o usuário que as respostas foram salvas
+                        Toast.makeText(
+                            navController.context,
+                            "Respostas sobre bem estar salvas",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                 )
             }
 
