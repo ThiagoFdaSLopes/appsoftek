@@ -2,7 +2,9 @@ package com.grupo.appsoftek.ui.theme.view
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.grupo.appsoftek.ui.theme.components.QuestionnaireScreen
+import com.grupo.appsoftek.ui.theme.viewmodel.QuestionResponseViewModel
 
 // Data class para representar uma pergunta de saúde mental
 data class MentalHealthQuestion(
@@ -15,6 +17,8 @@ fun ProductivityQuestionScreen(
     onBackPressed: () -> Unit = {},
     onFinished: (List<String?>) -> Unit = {}
 ) {
+    // ViewModel para gerenciar as respostas
+    val viewModel: QuestionResponseViewModel = viewModel()
     // Lista de perguntas sobre saúde mental
     val mentalHealthQuestions = listOf(
         MentalHealthQuestion(
@@ -45,11 +49,26 @@ fun ProductivityQuestionScreen(
         navigationButtonColor = Color(0xFF8BB82D)      // Verde para botões de navegação
     )
 
+    // Criamos uma função para salvar as respostas no banco de dados
+    // Função que será passada para o onFinished do componente
+    val handleFinished = { answers: List<String?> ->
+        // Criar pares de pergunta e resposta
+        val questionsWithAnswers = questions.mapIndexed { index, question ->
+            question.question to answers.getOrNull(index)
+        }
+
+        // Salvar no banco de dados
+        viewModel.saveQuestionnaireResponses("produtividade", questionsWithAnswers)
+
+        // Chamar a função original onFinished
+        onFinished(answers)
+    }
+
     // Usar o componente reutilizável
     QuestionnaireScreen(
         questions = questions,
         theme = mentalHealthTheme,
         onBackPressed = onBackPressed,
-        onFinished = onFinished
+        onFinished = handleFinished
     )
 }
