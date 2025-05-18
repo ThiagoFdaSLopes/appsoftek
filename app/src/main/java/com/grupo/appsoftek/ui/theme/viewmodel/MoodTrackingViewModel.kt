@@ -30,21 +30,21 @@ class MoodTrackingViewModel(application: Application) : AndroidViewModel(applica
 
     // Lista de opções de humor
     val todayEmojis = listOf(
-        MoodOption(1, "😲", "Triste"),
-        MoodOption(2, "👋", "Alegre"),
-        MoodOption(3, "😌", "Cansado"),
-        MoodOption(4, "🥺", "Ansioso"),
+        MoodOption(1, "😢", "Triste"),
+        MoodOption(2, "🙂", "Alegre"),
+        MoodOption(3, "😥", "Cansado"),
+        MoodOption(4, "😰", "Ansioso"),
         MoodOption(5, "😡", "Raiva"),
         MoodOption(6, "😃", "Feliz")
     )
 
     val feelingOptions = listOf(
-        MoodOption(1, "😲", "Motivado"),
-        MoodOption(2, "👋", "Cansado"),
-        MoodOption(3, "😌", "Preocupado"),
-        MoodOption(4, "🥺", "Estressado"),
-        MoodOption(5, "😡", "Animado"),
-        MoodOption(6, "😃", "Satisfeito")
+        MoodOption(1, "😎", "Motivado"),
+        MoodOption(2, "😥", "Cansado"),
+        MoodOption(3, "😨", "Preocupado"),
+        MoodOption(4, "😤", "Estressado"),
+        MoodOption(5, "😃", "Animado"),
+        MoodOption(6, "😉", "Satisfeito")
     )
 
     // Estados para armazenar a seleção do usuário
