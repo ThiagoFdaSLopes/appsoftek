@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.grupo.appsoftek.ui.theme.components.QuestionnaireScreen
+import com.grupo.appsoftek.ui.theme.viewmodel.QuestionResponseViewModel
 import com.grupo.appsoftek.ui.viewmodel.QuoteViewModel
 
 // Data class para representar uma pergunta genérica
@@ -44,6 +45,8 @@ fun WorkloadQuestionScreen(
     onBackPressed: () -> Unit = {},
     onFinished: (List<String?>) -> Unit = {}
 ) {
+    // ViewModel para gerenciar as respostas
+    val viewModel: QuestionResponseViewModel = viewModel()
     // ViewModel para buscar citação
     val quoteViewModel: QuoteViewModel = viewModel()
     // Observando LiveData com Compose
@@ -128,12 +131,25 @@ fun WorkloadQuestionScreen(
             }
         }
 
+        val handleFinished = { answers: List<String?> ->
+            // Criar pares de pergunta e resposta
+            val questionsWithAnswers = questions.mapIndexed { index, question ->
+                question.question to answers.getOrNull(index)
+            }
+
+            // Salvar no banco de dados
+            viewModel.saveQuestionnaireResponses("carga-de-trabalho", questionsWithAnswers)
+
+            // Chamar a função original onFinished
+            onFinished(answers)
+        }
+
         // Tela de questionário reutilizável
         QuestionnaireScreen(
             questions = questions,
             theme = workloadTheme,
             onBackPressed = onBackPressed,
-            onFinished = onFinished
+            onFinished = handleFinished
         )
     }
 }
