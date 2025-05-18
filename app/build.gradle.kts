@@ -1,9 +1,8 @@
 plugins {
+    id("com.google.devtools.ksp") version "2.0.0-1.0.21"
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    // Implementação para banco de dados
-    id("kotlin-kapt")
 }
 
 android {
@@ -72,7 +71,7 @@ dependencies {
     // Room Database
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
-    kapt(libs.androidx.room.compiler)
+    ksp(libs.androidx.room.compiler)
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.core)
