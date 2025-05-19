@@ -46,6 +46,9 @@ import com.grupo.appsoftek.ui.theme.view.RiskAssessmentScreen
 import com.grupo.appsoftek.ui.theme.view.SectionDetailScreen
 import com.grupo.appsoftek.ui.theme.view.SupportScreen
 import com.grupo.appsoftek.ui.theme.view.WorkloadQuestionScreen
+import android.widget.Toast
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.unit.dp
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,30 +66,30 @@ class MainActivity : ComponentActivity() {
 
 // Definindo as rotas do aplicativo
 sealed class Screen(val route: String, val title: String, val icon: Int) {
-    object Assessment : Screen("assessment", "Avaliação", R.drawable.softtek_logo)
-    object MoodTracking : Screen("mood", "Bem-estar", R.drawable.softtek_logo)
-    object Resources : Screen("resources", "Recursos", R.drawable.softtek_logo)
-    object Support : Screen("support", "Apoio", R.drawable.softtek_logo)
+    object Assessment : Screen("assessment", "Avaliação", R.drawable.ic_assessment)
+    object MoodTracking : Screen("mood", "Bem-estar", R.drawable.ic_wellbeing)
+    object Resources : Screen("resources", "Recursos", R.drawable.ic_resources)
+    object Support : Screen("support", "Apoio", R.drawable.ic_support)
 
-    // Rotas detalhadas
-    object SectionDetail : Screen("section/{sectionTitle}", "Detalhe", R.drawable.softtek_logo) {
+
+    object SectionDetail : Screen("section/{sectionTitle}", "Detalhe", R.drawable.hand_heart) {
         fun createRoute(sectionTitle: String) = "section/$sectionTitle"
     }
 
     // Rota para a tela de perguntas sobre carga de trabalho
-    object WorkloadQuestions : Screen("workload", "Carga de Trabalho", R.drawable.softtek_logo)
+    object WorkloadQuestions : Screen("workload", "Carga de Trabalho", R.drawable.hand_heart)
 
     // Nova rota para a tela de perguntas sobre produtividade
-    object ProductivityQuestions : Screen("productivity", "Produtividade", R.drawable.softtek_logo)
+    object ProductivityQuestions : Screen("productivity", "Produtividade", R.drawable.hand_heart)
 
     // Nova rota para a tela de perguntas sobre Clima
-    object ClimaQuestionsScreen : Screen("clima", "Clima", R.drawable.softtek_logo)
+    object ClimaQuestionsScreen : Screen("clima", "Clima", R.drawable.hand_heart)
 
     // Nova rota para a tela de perguntas sobre comunication
-    object QuestionsComunicationScreen : Screen("comunication", "Comunicação", R.drawable.softtek_logo)
+    object QuestionsComunicationScreen : Screen("comunication", "Comunicação", R.drawable.hand_heart)
 
     // Nova rota para a tela de perguntas sobre comunication
-    object QuestionsLeadersheapScreen : Screen("liderança", "Liderança", R.drawable.softtek_logo)
+    object QuestionsLeadersheapScreen : Screen("liderança", "Liderança", R.drawable.hand_heart)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -196,7 +199,17 @@ fun AppNavigation() {
 
             composable(Screen.MoodTracking.route) {
                 MoodTrackingScreen(
-                    onBackPressed = { navController.popBackStack() }
+                    onBackPressed = { navController.popBackStack() },
+                    onFinished = { ->
+                        // Aqui você pode salvar as respostas ou navegar para outra tela
+                        navController.popBackStack()
+                        // Você pode querer avisar o usuário que as respostas foram salvas
+                        Toast.makeText(
+                            navController.context,
+                            "Respostas sobre bem estar salvas",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                 )
             }
 
@@ -319,7 +332,9 @@ fun BottomNavBar(
                 icon = {
                     Icon(
                         painter = painterResource(id = screen.icon),
-                        contentDescription = screen.title
+                        contentDescription = screen.title,
+                        modifier = Modifier.size(26.dp)
+
                     )
                 },
                 label = { Text(screen.title) },

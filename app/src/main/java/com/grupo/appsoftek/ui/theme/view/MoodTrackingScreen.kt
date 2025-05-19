@@ -1,5 +1,6 @@
 package com.grupo.appsoftek.ui.theme.view
 
+import android.app.Application
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,17 +17,27 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import com.grupo.appsoftek.factory.MoodTrackingViewModelFactory
 import com.grupo.appsoftek.ui.theme.components.ActionButtons
 import com.grupo.appsoftek.ui.theme.components.MoodSelectionCard
 import com.grupo.appsoftek.ui.theme.viewmodel.MoodTrackingViewModel
 
 @Composable
 fun MoodTrackingScreen(
-    viewModel: MoodTrackingViewModel = viewModel(),
-    onBackPressed: () -> Unit = {}
+    navController: NavController? = null,
+    onBackPressed: () -> Unit = {},
+    onFinished: () -> Unit = {}
 ) {
+    val context = LocalContext.current
+    // Criar o factory
+    val factory = MoodTrackingViewModelFactory(context.applicationContext as Application)
+    // Usar o factory para criar o ViewModel
+    val viewModel: MoodTrackingViewModel = viewModel(factory = factory)
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -71,7 +82,11 @@ fun MoodTrackingScreen(
             // Botões de ação
             ActionButtons(
                 onBack = onBackPressed,
-                onSubmit = { viewModel.saveResponses() },
+                onSubmit = {
+                    // Salvar as respostas e navegar para a próxima tela
+                    viewModel.saveResponses()
+                    onFinished()
+                },
                 isSubmitEnabled = viewModel.isFormComplete
             )
         }

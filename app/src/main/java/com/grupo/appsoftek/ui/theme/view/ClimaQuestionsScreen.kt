@@ -3,7 +3,9 @@ package com.grupo.appsoftek.ui.theme.view
 import androidx.compose.runtime.Composable
 
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.grupo.appsoftek.ui.theme.components.QuestionaireOptionsNumeric
+import com.grupo.appsoftek.ui.theme.viewmodel.QuestionResponseViewModel
 
 // Data class to represent the theme colors for the questionnaire
 data class QuestionnaireNumericTheme(
@@ -24,6 +26,8 @@ fun ClimaQuestionScreen(
     onBackPressed: () -> Unit = {},
     onFinished: (List<String?>) -> Unit = {}
 ) {
+    // ViewModel para gerenciar as respostas
+    val viewModel: QuestionResponseViewModel = viewModel()
     // Lista de perguntas de carga de trabalho
     val workloadQuestions = listOf(
         WorkloadQuestion(
@@ -71,11 +75,27 @@ fun ClimaQuestionScreen(
         navigationButtonColor = Color(0xFF05285E)   // Azul Softtek para botões
     )
 
+    // Criamos uma função para salvar as respostas no banco de dados
+    // Função que será passada para o onFinished do componente
+    val handleFinished = { answers: List<String?> ->
+        // Criar pares de pergunta e resposta
+        val questionsWithAnswers = questions.mapIndexed { index, question ->
+            question.question to answers.getOrNull(index)
+        }
+
+        // Salvar no banco de dados
+        viewModel.saveQuestionnaireResponses("clima", questionsWithAnswers)
+
+        // Chamar a função original onFinished
+        onFinished(answers)
+    }
+
+
     // Usar o componente reutilizável
     QuestionaireOptionsNumeric(
         questions = questions,
         theme = workloadTheme,
         onBackPressed = onBackPressed,
-        onFinished = onFinished
+        onFinished = handleFinished
     )
 }

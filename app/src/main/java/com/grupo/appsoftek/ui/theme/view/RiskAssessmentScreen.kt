@@ -30,42 +30,42 @@ data class Section(
 private val sampleSections = listOf(
     Section(
         title = "Bem-estar emocional",
-        icon = R.drawable.softtek_logo,
+        icon = R.drawable.hand_heart,
         answered = 1, total = 2,
         cardColor = Color(0xFF8DC63F),
         progressColor = Color(0xFF81C784)
     ),
     Section(
         title = "Carga de trabalho",
-        icon = R.drawable.softtek_logo,
+        icon = R.drawable.briefcase,
         answered = 1, total = 2,
         cardColor = Color(0xFF8DC63F),
         progressColor = Color(0xFF64B5F6)
     ),
     Section(
         title = "Produtividade",
-        icon = R.drawable.softtek_logo,
+        icon = R.drawable.network,
         answered = 1, total = 2,
         cardColor = Color(0xFF8DC63F),
         progressColor = Color(0xFF9575CD)
     ),
     Section(
         title = "Clima",
-        icon = R.drawable.softtek_logo,
+        icon = R.drawable.cloud,
         answered = 1, total = 2,
         cardColor = Color(0xFF8DC63F),
         progressColor = Color(0xFFE57373)
     ),
     Section(
         title = "Comunicação",
-        icon = R.drawable.softtek_logo,
+        icon = R.drawable.audio_lines,
         answered = 1, total = 2,
         cardColor = Color(0xFF8DC63F),
         progressColor = Color(0xFF7986CB)
     ),
     Section(
         title = "Liderança",
-        icon = R.drawable.softtek_logo,
+        icon = R.drawable.users,
         answered = 1, total = 2,
         cardColor = Color(0xFF8DC63F),
         progressColor = Color(0xFFFFB74D)
