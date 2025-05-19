@@ -12,6 +12,5 @@ interface QuoteApiService {
         @Header("Authorization") token: String,
         @Query("format") format: String = "json",
         @Query("lang") lang: String = "pt",
-        @Query("limit") limit: Int = 1
     ): Response<QuoteResponse>
 }

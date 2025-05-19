@@ -56,16 +56,11 @@ class MoodTrackingViewModel(application: Application) : AndroidViewModel(applica
 
     // Estado para verificar se o formulário está completo
     val isFormComplete: Boolean
-        get() = selectedEmojiId != null && selectedFeelingId != null
+        get() = selectedEmojiId != null
 
     // Função para selecionar um emoji
     fun selectEmoji(id: Int) {
         selectedEmojiId = id
-    }
-
-    // Função para selecionar um sentimento
-    fun selectFeeling(id: Int) {
-        selectedFeelingId = id
     }
 
     // Função para obter o label do emoji selecionado
@@ -75,25 +70,16 @@ class MoodTrackingViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    // Função para obter o label do sentimento selecionado
-    private fun getSelectedFeelingLabel(): String? {
-        return selectedFeelingId?.let { id ->
-            feelingOptions.find { it.id == id }?.label
-        }
-    }
-
     // Função para salvar as respostas
     fun saveResponses() {
         if (!isFormComplete) return
 
         viewModelScope.launch {
             val emojiLabel = getSelectedEmojiLabel() ?: return@launch
-            val feelingLabel = getSelectedFeelingLabel() ?: return@launch
 
             // Criar lista de pares de pergunta e resposta
             val questionsWithAnswers = listOf(
-                "Escolha o seu emoji de hoje!" to emojiLabel,
-                "Como você se sente hoje?" to feelingLabel
+                "Escolha o seu emoji de hoje!" to emojiLabel
             )
 
             // Salvar no banco de dados usando o repository

@@ -22,7 +22,7 @@ class QuestionResponseViewModel(application: Application) : AndroidViewModel(app
 
     // Mapa dos totais de perguntas por tipo (ajuste aos seus números reais)
     private val totalQuestionsMap = mapOf(
-        "mood_tracking"      to 2,
+        "mood_tracking"      to 1,
         "carga-de-trabalho"         to 3,
         "produtividade" to 2,
         "clima"         to 7,

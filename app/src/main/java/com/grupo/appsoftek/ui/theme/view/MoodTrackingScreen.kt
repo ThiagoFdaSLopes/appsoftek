@@ -1,6 +1,7 @@
 package com.grupo.appsoftek.ui.theme.view
 
 import android.app.Application
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -69,23 +70,18 @@ fun MoodTrackingScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Segunda pergunta - Como se sente
-            MoodSelectionCard(
-                title = "Como você se sente hoje?",
-                options = viewModel.feelingOptions,
-                selectedId = viewModel.selectedFeelingId,
-                onOptionSelected = { viewModel.selectFeeling(it) }
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
             // Botões de ação
             ActionButtons(
                 onBack = onBackPressed,
                 onSubmit = {
                     // Salvar as respostas e navegar para a próxima tela
                     viewModel.saveResponses()
-                    onFinished()
+                    navController?.popBackStack()
+                    Toast.makeText(
+                        navController?.context,
+                        "Respostas sobre bem-estar emocional salvas",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 },
                 isSubmitEnabled = viewModel.isFormComplete
             )

@@ -48,16 +48,7 @@ fun WorkloadQuestionScreen(
     // ViewModel para gerenciar as respostas
     val viewModel: QuestionResponseViewModel = viewModel()
     // ViewModel para buscar citação
-    val quoteViewModel: QuoteViewModel = viewModel()
-    // Observando LiveData com Compose
-    val quote by quoteViewModel.quote.observeAsState()
-    val isLoading by quoteViewModel.isLoading.observeAsState(false)
-    val error by quoteViewModel.error.observeAsState()
 
-    // Buscando uma citação assim que o Composable entra em composição
-    LaunchedEffect(Unit) {
-        quoteViewModel.fetchRandomQuote()
-    }
 
     // Perguntas de carga de trabalho
     val workloadQuestions = listOf(
@@ -93,43 +84,7 @@ fun WorkloadQuestionScreen(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        // Card da citação
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp),
-            colors = CardDefaults.cardColors(containerColor = workloadTheme.cardBackgroundColor),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                when {
-                    isLoading -> {
-                        CircularProgressIndicator()
-                    }
-                    error != null -> {
-                        Text(
-                            text = error ?: "Erro ao carregar citação",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = workloadTheme.questionTextColor,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                    quote != null -> {
-                        Text(
-                            text = "“${quote!!.quote}” — ${quote!!.author}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = workloadTheme.questionTextColor,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
-            }
-        }
+
 
         val handleFinished = { answers: List<String?> ->
             // Criar pares de pergunta e resposta
