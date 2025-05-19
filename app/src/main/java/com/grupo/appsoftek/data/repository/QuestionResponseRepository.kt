@@ -3,6 +3,7 @@ package com.grupo.appsoftek.data.repository
 import com.grupo.appsoftek.data.dao.QuestionResponseDao
 import com.grupo.appsoftek.data.model.QuestionResponse
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 class QuestionResponseRepository(private val questionResponseDao: QuestionResponseDao) {
 
@@ -44,4 +45,12 @@ class QuestionResponseRepository(private val questionResponseDao: QuestionRespon
     fun getAllResponses(): Flow<List<QuestionResponse>> {
         return questionResponseDao.getAllResponses()
     }
+
+    suspend fun hasAnsweredToday(questionnaireType: String): Boolean {
+        return questionResponseDao.countToday(questionnaireType) > 0
+    }
+
+    fun getTodayCountsMap(): Flow<Map<String, Int>> =
+        questionResponseDao.getTodayCounts()
+            .map { list -> list.associate { it.questionnaireType to it.count } }
 }

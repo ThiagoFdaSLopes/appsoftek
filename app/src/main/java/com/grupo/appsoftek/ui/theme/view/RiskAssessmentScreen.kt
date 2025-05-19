@@ -27,53 +27,8 @@ data class Section(
     val progressColor: Color
 )
 
-private val sampleSections = listOf(
-    Section(
-        title = "Bem-estar emocional",
-        icon = R.drawable.hand_heart,
-        answered = 1, total = 2,
-        cardColor = Color(0xFF8DC63F),
-        progressColor = Color(0xFF81C784)
-    ),
-    Section(
-        title = "Carga de trabalho",
-        icon = R.drawable.briefcase,
-        answered = 1, total = 2,
-        cardColor = Color(0xFF8DC63F),
-        progressColor = Color(0xFF64B5F6)
-    ),
-    Section(
-        title = "Produtividade",
-        icon = R.drawable.network,
-        answered = 1, total = 2,
-        cardColor = Color(0xFF8DC63F),
-        progressColor = Color(0xFF9575CD)
-    ),
-    Section(
-        title = "Clima",
-        icon = R.drawable.cloud,
-        answered = 1, total = 2,
-        cardColor = Color(0xFF8DC63F),
-        progressColor = Color(0xFFE57373)
-    ),
-    Section(
-        title = "Comunicação",
-        icon = R.drawable.audio_lines,
-        answered = 1, total = 2,
-        cardColor = Color(0xFF8DC63F),
-        progressColor = Color(0xFF7986CB)
-    ),
-    Section(
-        title = "Liderança",
-        icon = R.drawable.users,
-        answered = 1, total = 2,
-        cardColor = Color(0xFF8DC63F),
-        progressColor = Color(0xFFFFB74D)
-    )
-)
-
 @Composable
-fun RiskAssessmentScreen(sections: List<Section> = sampleSections, onSectionClick: (String) -> Unit = {}) {
+fun RiskAssessmentScreen(sections: List<Section>, onSectionClick: (String) -> Unit = {}) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -99,13 +54,15 @@ fun RiskAssessmentScreen(sections: List<Section> = sampleSections, onSectionClic
                     color = Color(0xFFBBDEFB)
                 )
                 Spacer(Modifier.height(12.dp))
+                val totalAnswered  = sections.sumOf { it.answered }
+                val totalQuestions = sections.sumOf { it.total }
                 LinearProgressIndicator(
-                    progress = sections.count { it.answered == it.total } / sections.size.toFloat(),
-                    modifier = Modifier
+                    progress   = if (totalQuestions>0) totalAnswered / totalQuestions.toFloat() else 0f,
+                    modifier    = Modifier
                         .fillMaxWidth()
                         .height(4.dp),
-                    color = Color(0xFF64FFDA),
-                    trackColor = Color(0xFF3F51B5)
+                    color       = Color(0xFF64FFDA),
+                    trackColor  = Color(0xFF3F51B5)
                 )
             }
         }
@@ -133,7 +90,7 @@ private fun SectionCard(
     onClick: () -> Unit
 ) {
     Card(
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(containerColor = section.cardColor),
         modifier = Modifier
             .fillMaxWidth()
@@ -142,7 +99,10 @@ private fun SectionCard(
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(horizontal = 16.dp)
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .fillMaxHeight() // Faz o Row ocupar toda a altura do Card
+                .padding(horizontal = 16.dp)
         ) {
             // Ícone dentro de círculo branco
             Box(

@@ -47,9 +47,14 @@ import com.grupo.appsoftek.ui.theme.view.SupportScreen
 import com.grupo.appsoftek.ui.theme.view.WorkloadQuestionScreen
 import android.widget.Toast
 import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.grupo.appsoftek.ui.theme.view.NotificationsScreen
 import com.grupo.appsoftek.ui.theme.view.SupportNetworking
+import com.grupo.appsoftek.ui.theme.viewmodel.QuestionResponseViewModel
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -92,6 +97,8 @@ sealed class Screen(val route: String, val title: String, val icon: Int) {
     // Nova rota para a tela de perguntas sobre comunication
     object QuestionsLeadersheapScreen : Screen("liderança", "Liderança", R.drawable.hand_heart)
 
+    // Nova rota para a tela de perguntas sobre comunication
+    object BemEstarEmocional : Screen("Bem-estar emocional", "mood_tracking", R.drawable.hand_heart)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -100,6 +107,11 @@ fun AppNavigation() {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+
+    val qrVm: QuestionResponseViewModel = viewModel()
+    val sections by qrVm.sectionsFlow.collectAsState()
+
+    val scope = rememberCoroutineScope()
 
     // Lista das telas principais para a barra de navegação
     val mainScreens = listOf(
@@ -132,6 +144,7 @@ fun AppNavigation() {
             currentRoute == Screen.QuestionsComunicationScreen.route -> Screen.QuestionsComunicationScreen.title
             currentRoute == Screen.QuestionsLeadersheapScreen.route -> Screen.QuestionsLeadersheapScreen.title
             currentRoute == Screen.ProductivityQuestions.route -> Screen.ProductivityQuestions.title
+            currentRoute == Screen.BemEstarEmocional.route -> Screen.BemEstarEmocional.title
             else -> ""
         }
     }
@@ -185,18 +198,42 @@ fun AppNavigation() {
         ) {
             composable(Screen.Assessment.route) {
                 RiskAssessmentScreen(
+                    sections = sections,
                     onSectionClick = { sectionTitle ->
-                        when (sectionTitle) {
-                            "Dashboard" -> navController.navigate(Screen.Dashboard.route)
-                            "Carga de trabalho" -> navController.navigate(Screen.WorkloadQuestions.route)
-                            "Produtividade" -> navController.navigate(Screen.ProductivityQuestions.route)
-                            "Clima" -> navController.navigate(Screen.ClimaQuestionsScreen.route)
-                            "Comunicação" -> navController.navigate(Screen.QuestionsComunicationScreen.route)
-                            "Liderança" -> navController.navigate(Screen.QuestionsLeadersheapScreen.route)
-                            "Apoio" -> navController.navigate(Screen.Support.route)
-                            "Notificações" -> navController.navigate(Screen.Resources.route)
-                            else -> navController.navigate(Screen.SectionDetail.createRoute(sectionTitle))
+                        // mapeia o tipo de questionário a partir do título
+                        val questionnaireType = when (sectionTitle) {
+                            "Bem-estar emocional" -> "mood_tracking"
+                            "Carga de trabalho"     -> "carga-de-trabalho"
+                            "Produtividade"        -> "produtividade"
+                            "Clima"                -> "clima"
+                            "Comunicação"          -> "comunicacao"
+                            "Liderança"            -> "liderança"
+                            else                   -> ""
                         }
+                        // checa e navega ou mostra Toast
+                        scope.launch {
+                            if (qrVm.hasAnsweredToday(questionnaireType)) {
+                                Toast.makeText(
+                                    navController.context,
+                                    "Você já respondeu '$sectionTitle' hoje.",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            } else {
+                                // só navega se ainda não respondeu
+                                when (sectionTitle) {
+                                    "Dashboard" -> navController.navigate(Screen.Dashboard.route)
+                                    "Carga de trabalho" -> navController.navigate(Screen.WorkloadQuestions.route)
+                                    "Produtividade" -> navController.navigate(Screen.ProductivityQuestions.route)
+                                    "Clima" -> navController.navigate(Screen.ClimaQuestionsScreen.route)
+                                    "Comunicação" -> navController.navigate(Screen.QuestionsComunicationScreen.route)
+                                    "Liderança" -> navController.navigate(Screen.QuestionsLeadersheapScreen.route)
+                                    "Apoio" -> navController.navigate(Screen.Support.route)
+                                    "Notificações" -> navController.navigate(Screen.Resources.route)
+                                    "Bem-estar emocional" -> navController.navigate(Screen.BemEstarEmocional.route)
+                                    else -> navController.navigate(Screen.SectionDetail.createRoute(sectionTitle))
+                                }
+                            }
+                            }
                     }
                 )
             }
@@ -213,6 +250,13 @@ fun AppNavigation() {
                 SupportNetworking()
             }
 
+            // Rota para a tela de perguntas sobre carga de trabalho
+            composable(Screen.BemEstarEmocional.route) {
+                MoodTrackingScreen(
+                    onBackPressed = { navController.popBackStack() },
+                    navController = navController
+                )
+            }
 
 
             // Rota para a tela de perguntas sobre carga de trabalho
