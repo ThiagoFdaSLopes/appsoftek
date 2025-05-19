@@ -1,6 +1,7 @@
 package com.grupo.appsoftek
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -35,19 +36,19 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.grupo.appsoftek.ui.theme.AppSoftekTheme
+import com.grupo.appsoftek.ui.theme.view.ClimaQuestionScreen
 import com.grupo.appsoftek.ui.theme.view.MoodTrackingScreen
 import com.grupo.appsoftek.ui.theme.view.ProductivityQuestionScreen
+import com.grupo.appsoftek.ui.theme.view.QuestionsComunicationScreen
+import com.grupo.appsoftek.ui.theme.view.QuestionsLeadersheapScreen
 import com.grupo.appsoftek.ui.theme.view.ResourcesScreen
+import com.grupo.appsoftek.ui.theme.view.RiskAssessmentScreen
 import com.grupo.appsoftek.ui.theme.view.SectionDetailScreen
 import com.grupo.appsoftek.ui.theme.view.SupportScreen
-import com.grupo.appsoftek.ui.theme.view.RiskAssessmentScreen
 import com.grupo.appsoftek.ui.theme.view.WorkloadQuestionScreen
 import android.widget.Toast
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.unit.dp
-import com.grupo.appsoftek.ui.theme.view.ClimaQuestionScreen
-import com.grupo.appsoftek.ui.theme.view.QuestionsComunicationScreen
-import com.grupo.appsoftek.ui.theme.view.QuestionsLeadersheapScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
