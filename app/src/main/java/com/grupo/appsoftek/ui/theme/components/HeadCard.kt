@@ -1,26 +1,41 @@
 package com.grupo.appsoftek.ui.theme.components
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.grupo.appsoftek.R
 import com.grupo.appsoftek.ui.theme.Bluettek
+import com.grupo.appsoftek.ui.theme.viewmodel.QuestionResponseViewModel
+import com.grupo.appsoftek.ui.viewmodel.QuoteViewModel
 
 @Composable
-fun HeadCard(modifier: Modifier = Modifier) {
+fun HeadCard(
+    modifier: Modifier = Modifier,
+) {
     Surface(
-        modifier = modifier.fillMaxWidth().size(width = 300.dp, height = 150.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .size(width = 300.dp, height = 150.dp),
+
         color = Color.White,
         shadowElevation = 32.dp,
         shape = androidx.compose.foundation.shape.RoundedCornerShape(
@@ -76,15 +91,31 @@ fun HeadCard(modifier: Modifier = Modifier) {
                     text = "15 minutos atrás", color = Bluettek, fontSize = 12.sp
                 )
             }
-
         }
     }
 }
 
 @Composable
-fun HeadCardMsgMotiva(modifier: Modifier = Modifier) {
+fun HeadCardMsgMotiva(
+    modifier: Modifier = Modifier,
+) {
+    val viewModel: QuestionResponseViewModel = viewModel()
+    // ViewModel para buscar citação
+    val quoteViewModel: QuoteViewModel = viewModel()
+    // Observando LiveData com Compose
+    val quote by quoteViewModel.quote.observeAsState()
+    val isLoading by quoteViewModel.isLoading.observeAsState(false)
+    val error by quoteViewModel.error.observeAsState()
+
+    // Buscando uma citação assim que o Composable entra em composição
+    LaunchedEffect(Unit) {
+        quoteViewModel.fetchRandomQuote()
+    }
+
     Surface(
-        modifier = modifier.fillMaxWidth().size(width = 300.dp, height = 150.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .size(width = 300.dp, height = 150.dp),
         color = Color.White,
         shadowElevation = 32.dp,
         shape = androidx.compose.foundation.shape.RoundedCornerShape(
@@ -119,33 +150,59 @@ fun HeadCardMsgMotiva(modifier: Modifier = Modifier) {
                     )
                 )
             }
-            Text(
-                text = "“A maior glória não está em nunca cair, mas em se\n levantar cada vez que caímos.” - Confúcio ",
-                color = Bluettek,
-                fontSize = 12.sp,
+
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 10.dp)
-            )
-            Row {
+                    .padding(horizontal = 10.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                when {
+                    isLoading -> {
+                        CircularProgressIndicator(color = Bluettek, strokeWidth = 2.dp)
+                    }
+                    error != null -> {
+                        Text(
+                            text = error ?: "Erro ao carregar citação",
+                            color = Bluettek,
+                            fontSize = 12.sp,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                    quote != null -> {
+                        Text(
+                            text = quote!!.quote,  // Acesso direto à string da citação
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        )
+                    }
+                }
+            }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(bottom = 5.dp)
+            ) {
                 Image(
                     painter = painterResource(id = R.drawable.icon_status_time),
-                    contentDescription = "Ícone do statuso de tempo",
+                    contentDescription = "Ícone do status de tempo",
                     modifier = Modifier.size(13.dp)
                 )
+                Spacer(modifier = Modifier.width(2.dp))
                 Text(
                     text = "1 hora atrás", color = Bluettek, fontSize = 12.sp
                 )
             }
-
         }
     }
 }
 
 @Composable
-fun HeadCardApoio(modifier: Modifier = Modifier) {
+fun HeadCardApoio(modifier: Modifier = Modifier,     onClick: () -> Unit = {}
+) {
     Surface(
-        modifier = modifier.fillMaxWidth().size(width = 300.dp, height = 150.dp),
+        modifier = modifier.fillMaxWidth().size(width = 300.dp, height = 150.dp).clickable { onClick() },
         color = Color.White,
         shadowElevation = 32.dp,
         shape = androidx.compose.foundation.shape.RoundedCornerShape(
