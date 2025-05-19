@@ -3,31 +3,32 @@ package com.grupo.appsoftek.data.repository
 import com.grupo.appsoftek.data.model.Quote
 import com.grupo.appsoftek.data.network.QuoteApiService
 import com.grupo.appsoftek.data.network.RetrofitClient
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlin.random.Random
 
 class QuoteRepository {
     private val apiService = RetrofitClient.createService(QuoteApiService::class.java)
-    private val apiToken = "Token YOUR_API_TOKEN" // coloque seu token real aqui
+    private val apiToken = "Token SEU_TOKEN_AQUI" // Substitua pelo seu token real
 
     suspend fun getRandomQuote(): Result<Quote> {
-        return withContext(Dispatchers.IO) {
-            try {
-                val response = apiService.getRandomQuote(token = apiToken)
-                if (response.isSuccessful) {
-                    val body = response.body()
-                    val results = body?.results
-                    if (!results.isNullOrEmpty()) {
-                        Result.success(results[0])
-                    } else {
-                        Result.failure(Exception("Nenhuma citação encontrada"))
-                    }
+        return try {
+            val response = apiService.getRandomQuote(token = apiToken)
+
+            if (response.isSuccessful) {
+                val quoteResponse = response.body()
+
+                if (quoteResponse != null && quoteResponse.results.isNotEmpty()) {
+                    // Escolha uma citação aleatória da lista de resultados
+                    val randomIndex = Random.nextInt(quoteResponse.results.size)
+                    val randomQuote = quoteResponse.results[randomIndex]
+                    Result.success(randomQuote)
                 } else {
-                    Result.failure(Exception("Erro ao buscar citação: ${response.code()}"))
+                    Result.failure(Exception("Nenhuma citação encontrada"))
                 }
-            } catch (e: Exception) {
-                Result.failure(e)
+            } else {
+                Result.failure(Exception("Erro na API: ${response.code()} - ${response.message()}"))
             }
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 }

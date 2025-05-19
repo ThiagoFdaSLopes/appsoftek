@@ -22,6 +22,10 @@ class QuoteViewModel : ViewModel() {
 
     fun fetchRandomQuote() {
         _isLoading.value = true
+        // Resetar o quote atual para garantir um novo carregamento visual
+        _quote.value = null
+        _error.value = null
+
         viewModelScope.launch {
             repository.getRandomQuote()
                 .onSuccess { quote ->
@@ -33,5 +37,9 @@ class QuoteViewModel : ViewModel() {
                     _isLoading.value = false
                 }
         }
+    }
+
+    fun refreshQuote() {
+        fetchRandomQuote()
     }
 }
