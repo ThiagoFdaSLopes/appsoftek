@@ -20,4 +20,29 @@ interface QuestionResponseDao {
 
     @Query("SELECT * FROM question_responses ORDER BY answeredAt DESC")
     fun getAllResponses(): Flow<List<QuestionResponse>>
+
+    // conta quantas respostas daquele tipo foram dadas hoje (localtime)
+    @Query("""
+      SELECT COUNT(*) 
+      FROM question_responses 
+      WHERE questionnaireType = :type 
+        AND date(answeredAt / 1000, 'unixepoch', 'localtime') 
+            = date('now','localtime')
+    """)
+    suspend fun countToday(type: String): Int
+
+    data class TypeCount(
+        val questionnaireType: String,
+        val count: Int
+    )
+
+    @Query("""
+    SELECT questionnaireType AS questionnaireType, 
+           COUNT(*) AS count
+      FROM question_responses
+     WHERE date(answeredAt/1000, 'unixepoch', 'localtime')
+           = date('now','localtime')
+     GROUP BY questionnaireType
+  """)
+    fun getTodayCounts(): Flow<List<TypeCount>>
 }
