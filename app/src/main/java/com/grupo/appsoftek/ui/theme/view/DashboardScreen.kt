@@ -2,8 +2,11 @@ package com.grupo.appsoftek.ui.theme.view
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.grupo.appsoftek.R
 import com.grupo.appsoftek.ui.theme.components.DailyProgress
 import com.grupo.appsoftek.ui.theme.components.DashboardCheckin
@@ -11,9 +14,16 @@ import com.grupo.appsoftek.ui.theme.components.DashboardHumor
 import com.grupo.appsoftek.ui.theme.components.HeadDefault
 import com.grupo.appsoftek.ui.theme.components.MoodDay
 import com.grupo.appsoftek.ui.theme.components.ProgressBarChart
+import com.grupo.appsoftek.ui.theme.viewmodel.QuestionResponseViewModel
 
 @Composable
-fun DashboardScreen(modifier: Modifier = Modifier) {
+fun DashboardScreen(
+    modifier: Modifier = Modifier,
+    qrVm: QuestionResponseViewModel = viewModel()
+) {
+    val totalResponses by qrVm.totalResponsesCount.collectAsState()
+
+
     // Exemplo de lista de humores (substitua pela sua lógica real)
     val userMoods = listOf(
         MoodDay("10/05", R.drawable.icon_fear),
@@ -38,7 +48,7 @@ fun DashboardScreen(modifier: Modifier = Modifier) {
             subtitle = "Veja como está sua evolução"
         )
         DashboardCheckin(
-            day = 7 // Supondo que o 'day' seja fixo ou obtido de outra forma
+            day = totalResponses // Supondo que o 'day' seja fixo ou obtido de outra forma
         )
         DashboardHumor(
             moods = userMoods // Passa a lista de humores para o componente

@@ -7,11 +7,11 @@ import kotlin.random.Random
 
 class QuoteRepository {
     private val apiService = RetrofitClient.createService(QuoteApiService::class.java)
-    private val apiToken = "Token SEU_TOKEN_AQUI" // Substitua pelo seu token real
+
 
     suspend fun getRandomQuote(): Result<Quote> {
         return try {
-            val response = apiService.getRandomQuote(token = apiToken)
+            val response = apiService.getRandomQuote()
 
             if (response.isSuccessful) {
                 val quoteResponse = response.body()

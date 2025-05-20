@@ -101,6 +101,14 @@ class QuestionResponseViewModel(application: Application) : AndroidViewModel(app
         }
     }
 
+    val totalResponsesCount: StateFlow<Int> =
+        repository.getAllResponsesCount()
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = 0
+            )
+
     fun getResponsesByQuestionnaireType(questionnaireType: String): Flow<List<QuestionResponse>> {
         return repository.getResponsesByQuestionnaireType(questionnaireType)
     }

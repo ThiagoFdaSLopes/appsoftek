@@ -21,6 +21,9 @@ interface QuestionResponseDao {
     @Query("SELECT * FROM question_responses ORDER BY answeredAt DESC")
     fun getAllResponses(): Flow<List<QuestionResponse>>
 
+    @Query("SELECT COUNT(DISTINCT date(answeredAt / 1000, 'unixepoch', 'localtime')) FROM question_responses")
+    fun countAllResponses(): Flow<Int>
+
     // conta quantas respostas daquele tipo foram dadas hoje (localtime)
     @Query("""
       SELECT COUNT(*) 

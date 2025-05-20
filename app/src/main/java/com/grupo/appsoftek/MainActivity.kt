@@ -51,6 +51,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.grupo.appsoftek.ui.theme.view.DashboardScreen
 import com.grupo.appsoftek.ui.theme.view.NotificationsScreen
 import com.grupo.appsoftek.ui.theme.view.SupportNetworking
 import com.grupo.appsoftek.ui.theme.viewmodel.QuestionResponseViewModel
@@ -239,7 +240,7 @@ fun AppNavigation() {
             }
 
             composable(Screen.Dashboard.route) {
-                // COLOCAR SCREEN DASHBOARD
+                DashboardScreen()
             }
 
             composable(Screen.Resources.route) {

@@ -9,8 +9,8 @@ import retrofit2.http.Query
 interface QuoteApiService {
     @GET("quotes/")
     suspend fun getRandomQuote(
-        @Header("Authorization") token: String,
         @Query("format") format: String = "json",
         @Query("lang") lang: String = "pt",
+        @Query("limit") limit: String = "25",
     ): Response<QuoteResponse>
 }

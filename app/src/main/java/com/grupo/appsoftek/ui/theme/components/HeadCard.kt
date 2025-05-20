@@ -81,16 +81,7 @@ fun HeadCard(
             Emogis(
                 modifier = Modifier.padding(bottom = 10.dp)
             )
-            Row {
-                Image(
-                    painter = painterResource(id = R.drawable.icon_status_time),
-                    contentDescription = "Ícone do statuso de tempo",
-                    modifier = Modifier.size(13.dp)
-                )
-                Text(
-                    text = "15 minutos atrás", color = Bluettek, fontSize = 12.sp
-                )
-            }
+
         }
     }
 }
@@ -180,20 +171,7 @@ fun HeadCardMsgMotiva(
                 }
             }
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(bottom = 5.dp)
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.icon_status_time),
-                    contentDescription = "Ícone do status de tempo",
-                    modifier = Modifier.size(13.dp)
-                )
-                Spacer(modifier = Modifier.width(2.dp))
-                Text(
-                    text = "1 hora atrás", color = Bluettek, fontSize = 12.sp
-                )
-            }
+
         }
     }
 }
@@ -245,16 +223,7 @@ fun HeadCardApoio(modifier: Modifier = Modifier,     onClick: () -> Unit = {}
                     .fillMaxWidth()
                     .padding(horizontal = 10.dp)
             )
-            Row {
-                Image(
-                    painter = painterResource(id = R.drawable.icon_status_time),
-                    contentDescription = "Ícone do statuso de tempo",
-                    modifier = Modifier.size(13.dp)
-                )
-                Text(
-                    text = "Há mais de uma hora", color = Bluettek, fontSize = 12.sp
-                )
-            }
+
 
         }
     }

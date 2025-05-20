@@ -38,6 +38,9 @@ class QuestionResponseRepository(private val questionResponseDao: QuestionRespon
         return questionResponseDao.insertResponses(responses)
     }
 
+    fun getAllResponsesCount(): Flow<Int> = questionResponseDao.countAllResponses()
+
+
     fun getResponsesByQuestionnaireType(questionnaireType: String): Flow<List<QuestionResponse>> {
         return questionResponseDao.getResponsesByQuestionnaireType(questionnaireType)
     }
