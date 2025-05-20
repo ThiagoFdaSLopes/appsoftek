@@ -46,22 +46,22 @@ fun NotificationsScreen(modifier: Modifier = Modifier) {
         HeadCardApoio(modifier = Modifier.padding(horizontal = 20.dp))
         Spacer(modifier = Modifier.height(30.dp))
 
-        Text(
-            text = "Ontem",
-            color = Bluettek,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(start = 20.dp)
-        )
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        HeadCard(modifier = Modifier.padding(horizontal = 20.dp))
-        Spacer(modifier = Modifier.height(10.dp))
-        HeadCardMsgMotiva(modifier = Modifier.padding(horizontal = 20.dp))
-        Spacer(modifier = Modifier.height(10.dp))
-        HeadCardApoio(modifier = Modifier.padding(horizontal = 20.dp))
-        Spacer(modifier = Modifier.height(10.dp))
+//        Text(
+//            text = "Ontem",
+//            color = Bluettek,
+//            fontSize = 18.sp,
+//            fontWeight = FontWeight.SemiBold,
+//            modifier = Modifier.padding(start = 20.dp)
+//        )
+//
+//        Spacer(modifier = Modifier.height(10.dp))
+//
+//        HeadCard(modifier = Modifier.padding(horizontal = 20.dp))
+//        Spacer(modifier = Modifier.height(10.dp))
+//        HeadCardMsgMotiva(modifier = Modifier.padding(horizontal = 20.dp))
+//        Spacer(modifier = Modifier.height(10.dp))
+//        HeadCardApoio(modifier = Modifier.padding(horizontal = 20.dp))
+//        Spacer(modifier = Modifier.height(10.dp))
     }
 }
 
