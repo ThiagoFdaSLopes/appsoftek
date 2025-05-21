@@ -1,7 +1,6 @@
 package com.grupo.appsoftek.ui.theme.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,7 +39,7 @@ fun QuestionaireOptionsNumeric(
     title: String = "",
     questions: List<Question>,
     theme: QuestionnaireNumericTheme,
-    showNotificationIcon: Boolean = true,
+    showNotificationIcon: Boolean = false,
     onBackPressed: () -> Unit = {},
     onFinished: (List<String?>) -> Unit = {}
 ) {
@@ -151,7 +150,7 @@ fun QuestionaireOptionsNumeric(
                             val isSelected = optionValue == selectedOption
 
                             // Determine button color based on selection status
-                            val buttonColor = if (isSelected) selectedBlue else colors[i-1]
+                            val buttonColor = if (isSelected) selectedBlue else colors[i - 1]
 
                             Box(
                                 modifier = Modifier
@@ -173,7 +172,9 @@ fun QuestionaireOptionsNumeric(
                                         containerColor = buttonColor
                                     ),
                                     shape = RoundedCornerShape(8.dp),
-                                    contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)
+                                    contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                                        0.dp
+                                    )
                                 ) {
                                     Text(
                                         text = optionValue,

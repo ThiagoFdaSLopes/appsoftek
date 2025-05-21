@@ -1,10 +1,13 @@
 package com.grupo.appsoftek
 
+//import com.grupo.appsoftek.ui.theme.view.ResourcesScreen
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -17,14 +20,18 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -36,24 +43,16 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.grupo.appsoftek.ui.theme.AppSoftekTheme
 import com.grupo.appsoftek.ui.theme.view.ClimaQuestionScreen
+import com.grupo.appsoftek.ui.theme.view.DashboardScreen
 import com.grupo.appsoftek.ui.theme.view.MoodTrackingScreen
+import com.grupo.appsoftek.ui.theme.view.NotificationsScreen
 import com.grupo.appsoftek.ui.theme.view.ProductivityQuestionScreen
 import com.grupo.appsoftek.ui.theme.view.QuestionsComunicationScreen
 import com.grupo.appsoftek.ui.theme.view.QuestionsLeadersheapScreen
-import com.grupo.appsoftek.ui.theme.view.ResourcesScreen
 import com.grupo.appsoftek.ui.theme.view.RiskAssessmentScreen
 import com.grupo.appsoftek.ui.theme.view.SectionDetailScreen
-import com.grupo.appsoftek.ui.theme.view.SupportScreen
-import com.grupo.appsoftek.ui.theme.view.WorkloadQuestionScreen
-import android.widget.Toast
-import androidx.compose.foundation.layout.size
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.grupo.appsoftek.ui.theme.view.DashboardScreen
-import com.grupo.appsoftek.ui.theme.view.NotificationsScreen
 import com.grupo.appsoftek.ui.theme.view.SupportNetworking
+import com.grupo.appsoftek.ui.theme.view.WorkloadQuestionScreen
 import com.grupo.appsoftek.ui.theme.viewmodel.QuestionResponseViewModel
 import kotlinx.coroutines.launch
 
@@ -93,7 +92,8 @@ sealed class Screen(val route: String, val title: String, val icon: Int) {
     object ClimaQuestionsScreen : Screen("clima", "Clima", R.drawable.hand_heart)
 
     // Nova rota para a tela de perguntas sobre comunication
-    object QuestionsComunicationScreen : Screen("comunication", "Comunicação", R.drawable.hand_heart)
+    object QuestionsComunicationScreen :
+        Screen("comunication", "Comunicação", R.drawable.hand_heart)
 
     // Nova rota para a tela de perguntas sobre comunication
     object QuestionsLeadersheapScreen : Screen("liderança", "Liderança", R.drawable.hand_heart)
@@ -122,6 +122,19 @@ fun AppNavigation() {
         Screen.Support
     )
 
+    // Rotas onde NÃO queremos mostrar o TopBar
+    val noTopBarRoutes = listOf(
+        Screen.Dashboard.route,
+        Screen.Resources.route,
+        Screen.Support.route
+    )
+
+    // Exibir TopBar quando a rota atual NÃO estiver em noTopBarRoutes
+    val showTopBar by remember(currentRoute) {
+        derivedStateOf { currentRoute !in noTopBarRoutes }
+    }
+
+
     // Determina se estamos em uma tela secundária que precisa de botão voltar
     val showBackButton by remember(currentRoute) {
         derivedStateOf {
@@ -136,6 +149,7 @@ fun AppNavigation() {
                 val sectionTitle = navBackStackEntry?.arguments?.getString("sectionTitle") ?: ""
                 sectionTitle
             }
+
             currentRoute == Screen.Assessment.route -> Screen.Assessment.title
             currentRoute == Screen.Dashboard.route -> Screen.Dashboard.title
             currentRoute == Screen.Resources.route -> Screen.Resources.title
@@ -151,37 +165,42 @@ fun AppNavigation() {
     }
 
     // Determina se devemos mostrar a barra de navegação inferior
+//    val showBottomBar by remember(currentRoute) {
+//        derivedStateOf {
+//            mainScreens.any { it.route == currentRoute }
+//        }
+//    }
     val showBottomBar by remember(currentRoute) {
-        derivedStateOf {
-            mainScreens.any { it.route == currentRoute }
-        }
+        derivedStateOf { currentRoute in mainScreens.map { it.route } }
     }
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = currentScreenTitle,
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                navigationIcon = {
-                    if (showBackButton) {
-                        IconButton(onClick = { navController.popBackStack() }) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Voltar"
-                            )
+            if (showTopBar) {
+                CenterAlignedTopAppBar(
+                    title = {
+                        Text(
+                            text = currentScreenTitle,
+                            fontWeight = FontWeight.Bold
+                        )
+                    },
+                    navigationIcon = {
+                        if (currentRoute != null && currentRoute !in mainScreens.map { it.route }) {
+                            IconButton(onClick = { navController.popBackStack() }) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = "Voltar"
+                                )
+                            }
                         }
-                    }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color(0xFF1E3A8A),
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White
+                    },
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = Color(0xFF1E3A8A),
+                        titleContentColor = Color.White,
+                        navigationIconContentColor = Color.White
+                    )
                 )
-            )
+            }
         },
         bottomBar = {
             if (showBottomBar) {
@@ -204,12 +223,12 @@ fun AppNavigation() {
                         // mapeia o tipo de questionário a partir do título
                         val questionnaireType = when (sectionTitle) {
                             "Bem-estar emocional" -> "mood_tracking"
-                            "Carga de trabalho"     -> "carga-de-trabalho"
-                            "Produtividade"        -> "produtividade"
-                            "Clima"                -> "clima"
-                            "Comunicação"          -> "comunicacao"
-                            "Liderança"            -> "liderança"
-                            else                   -> ""
+                            "Carga de trabalho" -> "carga-de-trabalho"
+                            "Produtividade" -> "produtividade"
+                            "Clima" -> "clima"
+                            "Comunicação" -> "comunicacao"
+                            "Liderança" -> "liderança"
+                            else -> ""
                         }
                         // checa e navega ou mostra Toast
                         scope.launch {
@@ -231,10 +250,14 @@ fun AppNavigation() {
                                     "Apoio" -> navController.navigate(Screen.Support.route)
                                     "Notificações" -> navController.navigate(Screen.Resources.route)
                                     "Bem-estar emocional" -> navController.navigate(Screen.BemEstarEmocional.route)
-                                    else -> navController.navigate(Screen.SectionDetail.createRoute(sectionTitle))
+                                    else -> navController.navigate(
+                                        Screen.SectionDetail.createRoute(
+                                            sectionTitle
+                                        )
+                                    )
                                 }
                             }
-                            }
+                        }
                     }
                 )
             }

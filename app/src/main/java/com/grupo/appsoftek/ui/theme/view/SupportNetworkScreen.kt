@@ -1,6 +1,5 @@
 package com.grupo.appsoftek.ui.theme.view
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,10 +22,10 @@ fun SupportNetworking(modifier: Modifier = Modifier) {
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-        ){
+        ) {
             HeadDefault(
                 title = "Rede de apoio",
-                subtitle = "Um lugar seguro de dedicado a te apoiar"
+                subtitle = "Um lugar seguro e dedicado a te apoiar"
             )
 
             Spacer(modifier = Modifier.height(40.dp))

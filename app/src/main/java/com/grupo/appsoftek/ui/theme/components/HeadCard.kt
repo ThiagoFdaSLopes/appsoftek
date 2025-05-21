@@ -2,10 +2,17 @@ package com.grupo.appsoftek.ui.theme.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -152,6 +159,7 @@ fun HeadCardMsgMotiva(
                     isLoading -> {
                         CircularProgressIndicator(color = Bluettek, strokeWidth = 2.dp)
                     }
+
                     error != null -> {
                         Text(
                             text = error ?: "Erro ao carregar citação",
@@ -160,12 +168,17 @@ fun HeadCardMsgMotiva(
                             textAlign = TextAlign.Center
                         )
                     }
+
                     quote != null -> {
                         Text(
-                            text = quote!!.quote,  // Acesso direto à string da citação
-                            style = MaterialTheme.typography.bodyMedium,
+                            text = quote!!.quote,
+                            color = Bluettek,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Normal,
                             textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(horizontal = 8.dp)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 10.dp)
                         )
                     }
                 }
@@ -177,10 +190,14 @@ fun HeadCardMsgMotiva(
 }
 
 @Composable
-fun HeadCardApoio(modifier: Modifier = Modifier,     onClick: () -> Unit = {}
+fun HeadCardApoio(
+    modifier: Modifier = Modifier, onClick: () -> Unit = {}
 ) {
     Surface(
-        modifier = modifier.fillMaxWidth().size(width = 300.dp, height = 150.dp).clickable { onClick() },
+        modifier = modifier
+            .fillMaxWidth()
+            .size(width = 300.dp, height = 150.dp)
+            .clickable { onClick() },
         color = Color.White,
         shadowElevation = 32.dp,
         shape = androidx.compose.foundation.shape.RoundedCornerShape(

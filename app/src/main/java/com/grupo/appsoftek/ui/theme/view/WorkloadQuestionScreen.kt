@@ -1,18 +1,13 @@
 package com.grupo.appsoftek.ui.theme.view
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.grupo.appsoftek.ui.theme.components.QuestionnaireScreen
 import com.grupo.appsoftek.ui.theme.viewmodel.QuestionResponseViewModel
-import com.grupo.appsoftek.ui.viewmodel.QuoteViewModel
 
 // Data class para representar uma pergunta genérica
 data class Question(
@@ -82,7 +77,6 @@ fun WorkloadQuestionScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
     ) {
 
 
