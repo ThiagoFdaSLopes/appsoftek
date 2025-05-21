@@ -9,11 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,16 +39,6 @@ fun MoodTrackingScreen(
             .fillMaxSize()
             .background(Color(0xFF8DC63F)) // Verde Softtek
     ) {
-        // Ícone de sino no canto superior direito
-        Icon(
-            imageVector = Icons.Default.Notifications,
-            contentDescription = "Notificações",
-            tint = Color(0xFF05285E), // Azul Softtek
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(16.dp)
-                .size(28.dp)
-        )
 
         Column(
             modifier = Modifier.fillMaxSize(),

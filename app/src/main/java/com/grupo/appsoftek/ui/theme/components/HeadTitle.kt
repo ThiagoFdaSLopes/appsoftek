@@ -48,7 +48,7 @@ fun HeadTitle(modifier: Modifier = Modifier) {
             Column {
                 Text(
                     text = "Seus lembretes",
-                    color = Whitettek,
+                    color = Whitettek, //Cor branca
                     fontSize = 20.sp,
                     fontWeight = FontWeight.SemiBold,
                 )

@@ -40,7 +40,7 @@ fun QuestionnaireScreen(
     title: String = "",
     questions: List<Question>,
     theme: QuestionnaireTheme,
-    showNotificationIcon: Boolean = true,
+    showNotificationIcon: Boolean = false,
     onBackPressed: () -> Unit = {},
     onFinished: (List<String?>) -> Unit = {}
 ) {
@@ -127,9 +127,12 @@ fun QuestionnaireScreen(
                     // Options for current question
                     currentQuestion.options.forEach { option ->
                         val isSelected = option == selectedOption
-                        val backgroundColor = if (isSelected) theme.selectedOptionColor else theme.unselectedOptionColor
-                        val textColor = if (isSelected) theme.selectedTextColor else theme.unselectedTextColor
-                        val borderColor = if (isSelected) theme.selectedOptionColor else theme.borderColor
+                        val backgroundColor =
+                            if (isSelected) theme.selectedOptionColor else theme.unselectedOptionColor
+                        val textColor =
+                            if (isSelected) theme.selectedTextColor else theme.unselectedTextColor
+                        val borderColor =
+                            if (isSelected) theme.selectedOptionColor else theme.borderColor
 
                         Spacer(modifier = Modifier.height(8.dp))
 
