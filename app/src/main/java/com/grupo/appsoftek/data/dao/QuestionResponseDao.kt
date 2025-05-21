@@ -48,4 +48,35 @@ interface QuestionResponseDao {
      GROUP BY questionnaireType
   """)
     fun getTodayCounts(): Flow<List<TypeCount>>
+
+    @Query("""
+    SELECT * 
+      FROM question_responses 
+     WHERE questionnaireType = :type 
+     ORDER BY answeredAt DESC 
+     LIMIT :limit
+  """)
+    fun getLastResponses(
+        type: String,
+        limit: Int = 7
+    ): Flow<List<QuestionResponse>>
+
+    // retorna a média numérica das respostas de hoje pra um dado tipo
+    @Query("""
+    SELECT AVG(CAST(answer AS REAL))
+      FROM question_responses
+     WHERE questionnaireType = :type
+       AND date(answeredAt/1000,'unixepoch','localtime')
+           = date('now','localtime')
+  """)
+    fun getAverageToday(type: String): Flow<Double?>
+
+    @Query("""
+    SELECT * 
+      FROM question_responses 
+     WHERE questionnaireType = :type
+       AND date(answeredAt/1000,'unixepoch','localtime') 
+           = date('now','localtime')
+  """)
+    fun getTodayResponses(type: String): Flow<List<QuestionResponse>>
 }

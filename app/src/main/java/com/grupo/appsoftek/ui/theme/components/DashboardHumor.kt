@@ -25,6 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.grupo.appsoftek.R
+import com.grupo.appsoftek.ui.theme.Bluettek
 import com.grupo.appsoftek.ui.theme.Whitettek
 
 data class MoodDay(
@@ -51,6 +52,14 @@ fun DashboardHumor(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Mood emojis with dates
+            Text(
+                text = "Humor dos últimos dias",
+                color = Bluettek,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(bottom = 8.dp)
+                )
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -58,26 +67,6 @@ fun DashboardHumor(
                 moods.forEach { mood ->
                     MoodItem(date = mood.date, emojiResourceId = mood.emojiResourceId)
                 }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Check-in button
-            Button(
-                onClick = onCheckInClick,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(4.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF0A2D50) // Dark blue from the image
-                )
-            ) {
-                Text(
-                    text = "Fazer check-in de hoje",
-                    color = Color.White,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(vertical = 8.dp)
-                )
             }
         }
     }
