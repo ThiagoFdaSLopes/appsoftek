@@ -56,4 +56,36 @@ class QuestionResponseRepository(private val questionResponseDao: QuestionRespon
     fun getTodayCountsMap(): Flow<Map<String, Int>> =
         questionResponseDao.getTodayCounts()
             .map { list -> list.associate { it.questionnaireType to it.count } }
+
+    fun getLastMoodResponses(limit: Int = 7): Flow<List<QuestionResponse>> =
+        questionResponseDao.getLastResponses(type = "mood_tracking", limit = limit)
+
+    fun getAverageToday(type: String): Flow<Double> =
+        questionResponseDao.getAverageToday(type)
+            .map { it ?: 0.0 }
+
+    // mapeia string → nota de 1 a 5, conforme cada questionário
+    private fun answerToScore(
+        questionnaireType: String,
+        answer: String
+    ): Int = when (questionnaireType) {
+
+        "carga-de-trabalho" -> listOf("Muito Leve", "Leve", "Média", "Alta", "Muito Alta")
+            .indexOf(answer).let { if (it >= 0) it + 1 else 0 }
+
+        "produtividade" -> listOf("Nunca", "Raramente", "Às vezes", "Frequentemente", "Sempre")
+            .indexOf(answer).let { if (it >= 0) it + 1 else 0 }
+
+        "clima", "liderança" -> answer.toIntOrNull()?.coerceIn(1, 5) ?: 0
+
+        else -> 0
+    }
+
+    /** Média de hoje, já como Double de 1.0–5.0 */
+    fun getAverageScoreToday(type: String): Flow<Double> =
+        questionResponseDao.getTodayResponses(type)
+            .map { responses ->
+                val scores = responses.map { answerToScore(type, it.answer) }
+                if (scores.isEmpty()) 0.0 else scores.average()
+            }
 }
