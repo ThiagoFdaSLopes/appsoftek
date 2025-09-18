@@ -49,7 +49,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                 _authState.value = AuthState.Loading
                 val registerResponse = authRepository.register(password = password)
                     .getOrThrow()
-                val savedUuid = registerResponse.uuid
+                val savedUuid = registerResponse.id
                 // Se o backend retornar token, podemos salvar para chamadas futuras
                 registerResponse.token?.let { token ->
                     saveToken(token)

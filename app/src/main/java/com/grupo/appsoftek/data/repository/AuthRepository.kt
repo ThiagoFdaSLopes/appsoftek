@@ -12,7 +12,7 @@ class AuthRepository(
         return try {
             val response = api.register(RegisterRequest(password = password))
             if (response.isSuccessful) {
-                Result.success(response.body() ?: RegisterResponse(uuid = null, token = null, message = null))
+                Result.success(response.body() ?: RegisterResponse(id = null, token = null, message = null))
             } else {
                 Result.failure(Exception("Erro ${response.code()}: ${response.message()}"))
             }

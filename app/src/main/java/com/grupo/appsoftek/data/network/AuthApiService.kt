@@ -9,7 +9,7 @@ data class RegisterRequest(
 )
 
 data class RegisterResponse(
-    val uuid: String?,
+    val id: String?,
     val token: String?,
     val message: String?
 )
