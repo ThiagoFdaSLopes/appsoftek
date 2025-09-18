@@ -5,7 +5,6 @@ import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.grupo.appsoftek.data.repository.AuthRepository
-import java.util.UUID
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -48,11 +47,18 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             try {
                 _authState.value = AuthState.Loading
-                val uuid = UUID.randomUUID().toString()
-                authRepository.register(uuid = uuid, password = password)
+                val registerResponse = authRepository.register(password = password)
                     .getOrThrow()
-                saveCurrentUuid(uuid)
-                _currentUuid.value = uuid
+                val savedUuid = registerResponse.uuid
+                // Se o backend retornar token, podemos salvar para chamadas futuras
+                registerResponse.token?.let { token ->
+                    saveToken(token)
+                }
+                // Salvar UUID apenas se o backend retornar um
+                savedUuid?.let { uuid ->
+                    saveCurrentUuid(uuid)
+                    _currentUuid.value = uuid
+                }
                 _authState.value = AuthState.Authenticated
             } catch (e: Exception) {
                 _authState.value = AuthState.Error(e.message ?: "Erro ao criar usuário")
@@ -89,6 +95,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     private fun clearSavedUser() {
         sharedPreferences.edit()
             .remove("current_user_uuid")
+            .remove("auth_token")
             .apply()
     }
     
@@ -99,6 +106,13 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+}
+
+private fun AuthViewModel.saveToken(token: String) {
+    getApplication<Application>().getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+        .edit()
+        .putString("auth_token", token)
+        .apply()
 }
 
 sealed class AuthState {

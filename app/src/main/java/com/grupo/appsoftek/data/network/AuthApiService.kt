@@ -5,12 +5,12 @@ import retrofit2.http.Body
 import retrofit2.http.POST
 
 data class RegisterRequest(
-    val uuid: String,
     val password: String
 )
 
 data class RegisterResponse(
     val uuid: String?,
+    val token: String?,
     val message: String?
 )
 
