@@ -6,11 +6,14 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -20,11 +23,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -44,6 +49,8 @@ import androidx.navigation.navArgument
 import com.grupo.appsoftek.ui.theme.AppSoftekTheme
 import com.grupo.appsoftek.ui.theme.view.ClimaQuestionScreen
 import com.grupo.appsoftek.ui.theme.view.DashboardScreen
+import com.grupo.appsoftek.ui.theme.view.FirstTimeSetupScreen
+import com.grupo.appsoftek.ui.theme.view.LoginScreen
 import com.grupo.appsoftek.ui.theme.view.MoodTrackingScreen
 import com.grupo.appsoftek.ui.theme.view.NotificationsScreen
 import com.grupo.appsoftek.ui.theme.view.ProductivityQuestionScreen
@@ -53,6 +60,8 @@ import com.grupo.appsoftek.ui.theme.view.RiskAssessmentScreen
 import com.grupo.appsoftek.ui.theme.view.SectionDetailScreen
 import com.grupo.appsoftek.ui.theme.view.SupportNetworking
 import com.grupo.appsoftek.ui.theme.view.WorkloadQuestionScreen
+import com.grupo.appsoftek.ui.theme.viewmodel.AuthViewModel
+import com.grupo.appsoftek.ui.theme.viewmodel.AuthState
 import com.grupo.appsoftek.ui.theme.viewmodel.QuestionResponseViewModel
 import kotlinx.coroutines.launch
 
@@ -72,6 +81,8 @@ class MainActivity : ComponentActivity() {
 
 // Definindo as rotas do aplicativo
 sealed class Screen(val route: String, val title: String, val icon: Int) {
+    object FirstTimeSetup : Screen("first_time_setup", "Configuração Inicial", R.drawable.splash_icon)
+    object Login : Screen("login", "Login", R.drawable.splash_icon)
     object Assessment : Screen("assessment", "Avaliação", R.drawable.ic_assessment)
     object Dashboard : Screen("dashboard", "Dashboard", R.drawable.ic_wellbeing)
     object Resources : Screen("resources", "Notificações", R.drawable.ic_resources)
@@ -109,10 +120,65 @@ fun AppNavigation() {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
+    val authVm: AuthViewModel = viewModel()
+    val authState by authVm.authState.collectAsState()
+    
     val qrVm: QuestionResponseViewModel = viewModel()
     val sections by qrVm.sectionsFlow.collectAsState()
 
     val scope = rememberCoroutineScope()
+
+    // Navegar automaticamente baseado no estado de autenticação
+    LaunchedEffect(authState) {
+        when (authState) {
+            is AuthState.NeedsFirstTimeSetup -> {
+                navController.navigate(Screen.FirstTimeSetup.route) {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        inclusive = true
+                    }
+                }
+            }
+            is AuthState.NeedsLogin -> {
+                navController.navigate(Screen.Login.route) {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        inclusive = true
+                    }
+                }
+            }
+            is AuthState.Authenticated -> {
+                if (currentRoute == Screen.FirstTimeSetup.route || currentRoute == Screen.Login.route) {
+                    navController.navigate(Screen.Assessment.route) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            inclusive = true
+                        }
+                    }
+                }
+            }
+            else -> { /* Loading ou Error, não navegar automaticamente */ }
+        }
+    }
+
+    // Determinar a tela inicial baseada no estado de autenticação
+    val startDestination = when (authState) {
+        is AuthState.Loading -> Screen.Assessment.route // Temporário enquanto carrega
+        is AuthState.NeedsFirstTimeSetup -> Screen.FirstTimeSetup.route
+        is AuthState.NeedsLogin -> Screen.Login.route
+        is AuthState.Authenticated -> Screen.Assessment.route
+        is AuthState.Error -> Screen.Login.route // Em caso de erro, voltar ao login
+    }
+
+    // Se ainda está carregando, mostrar splash ou loading
+    if (authState is AuthState.Loading) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(
+                color = Color(0xFF8DC63F)
+            )
+        }
+        return
+    }
 
     // Lista das telas principais para a barra de navegação
     val mainScreens = listOf(
@@ -124,6 +190,8 @@ fun AppNavigation() {
 
     // Rotas onde NÃO queremos mostrar o TopBar
     val noTopBarRoutes = listOf(
+        Screen.FirstTimeSetup.route,
+        Screen.Login.route,
         Screen.Dashboard.route,
         Screen.Resources.route,
         Screen.Support.route
@@ -170,8 +238,10 @@ fun AppNavigation() {
 //            mainScreens.any { it.route == currentRoute }
 //        }
 //    }
-    val showBottomBar by remember(currentRoute) {
-        derivedStateOf { currentRoute in mainScreens.map { it.route } }
+    val showBottomBar by remember(currentRoute, authState) {
+        derivedStateOf { 
+            authState is AuthState.Authenticated && currentRoute in mainScreens.map { it.route }
+        }
     }
 
     Scaffold(
@@ -213,9 +283,34 @@ fun AppNavigation() {
     ) { paddingValues ->
         NavHost(
             navController = navController,
-            startDestination = Screen.Assessment.route,
+            startDestination = startDestination,
             modifier = Modifier.padding(paddingValues)
         ) {
+            // Rota de configuração inicial
+            composable(Screen.FirstTimeSetup.route) {
+                val currentAuthState = authState
+                FirstTimeSetupScreen(
+                    onSetupComplete = { password ->
+                        authVm.createFirstUser(password)
+                    },
+                    isLoading = currentAuthState is AuthState.Loading,
+                    errorMessage = if (currentAuthState is AuthState.Error) currentAuthState.message else null,
+                    onErrorDismiss = { authVm.clearError() }
+                )
+            }
+
+            // Rota de login
+            composable(Screen.Login.route) {
+                val currentAuthState = authState
+                LoginScreen(
+                    onLogin = { password ->
+                        authVm.login(password)
+                    },
+                    isLoading = currentAuthState is AuthState.Loading,
+                    errorMessage = if (currentAuthState is AuthState.Error) currentAuthState.message else null,
+                    onErrorDismiss = { authVm.clearError() }
+                )
+            }
             composable(Screen.Assessment.route) {
                 RiskAssessmentScreen(
                     sections = sections,
