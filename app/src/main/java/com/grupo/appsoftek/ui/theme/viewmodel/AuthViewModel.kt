@@ -56,7 +56,9 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                 }
                 // Salvar UUID apenas se o backend retornar um
                 savedUuid?.let { uuid ->
+                    println("DEBUG: Salvando user_id: $uuid")
                     saveCurrentUuid(uuid)
+                    saveUserId(uuid)
                     _currentUuid.value = uuid
                 }
                 _authState.value = AuthState.Authenticated
@@ -113,6 +115,15 @@ private fun AuthViewModel.saveToken(token: String) {
         .edit()
         .putString("auth_token", token)
         .apply()
+}
+
+private fun AuthViewModel.saveUserId(userId: String) {
+    println("DEBUG: saveUserId chamada com: $userId")
+    getApplication<Application>().getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+        .edit()
+        .putString("user_id", userId)
+        .apply()
+    println("DEBUG: user_id salvo no SharedPreferences")
 }
 
 sealed class AuthState {

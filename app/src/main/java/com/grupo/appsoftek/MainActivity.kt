@@ -63,6 +63,8 @@ import com.grupo.appsoftek.ui.theme.view.WorkloadQuestionScreen
 import com.grupo.appsoftek.ui.theme.viewmodel.AuthViewModel
 import com.grupo.appsoftek.ui.theme.viewmodel.AuthState
 import com.grupo.appsoftek.ui.theme.viewmodel.QuestionResponseViewModel
+import com.grupo.appsoftek.ui.theme.viewmodel.UserAssessmentsViewModel
+import com.grupo.appsoftek.ui.theme.viewmodel.UserAssessmentsUiState
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -125,8 +127,26 @@ fun AppNavigation() {
     
     val qrVm: QuestionResponseViewModel = viewModel()
     val sections by qrVm.sectionsFlow.collectAsState()
+    
+    val userAssessmentsVm: UserAssessmentsViewModel = viewModel()
+    val userAssessmentsState by userAssessmentsVm.uiState.collectAsState()
 
     val scope = rememberCoroutineScope()
+
+    // Carregar dados dos assessments quando a tela for criada
+    LaunchedEffect(Unit) {
+        println("DEBUG: MainActivity - LaunchedEffect inicial executado")
+        userAssessmentsVm.loadUserAssessments()
+    }
+    
+    // Recarregar dados quando voltar para a tela de assessment
+    LaunchedEffect(currentRoute) {
+        println("DEBUG: MainActivity - LaunchedEffect currentRoute mudou: $currentRoute")
+        if (currentRoute == Screen.Assessment.route) {
+            println("DEBUG: MainActivity - Recarregando dados para tela de assessment")
+            userAssessmentsVm.loadUserAssessments()
+        }
+    }
 
     // Navegar automaticamente baseado no estado de autenticação
     LaunchedEffect(authState) {
@@ -312,8 +332,44 @@ fun AppNavigation() {
                 )
             }
             composable(Screen.Assessment.route) {
+                // Criar seções com dados da API - usando derivedStateOf para reatividade
+                val apiSections by remember {
+                    derivedStateOf {
+                        println("DEBUG: MainActivity - Recalculando apiSections")
+                        println("DEBUG: MainActivity - userAssessmentsState: $userAssessmentsState")
+                        println("DEBUG: MainActivity - sections: $sections")
+                        
+                        if (userAssessmentsState is UserAssessmentsUiState.Loaded) {
+                            val updatedSections = sections.map { section ->
+                                val categoryName = when (section.title) {
+                                    "Bem-estar emocional" -> "bem-estar"
+                                    "Carga de trabalho" -> "Carga de trabalho"
+                                    "Produtividade" -> "Produtividade"
+                                    "Clima" -> "Clima"
+                                    "Comunicação" -> "Comunicação"
+                                    "Liderança" -> "Liderança"
+                                    else -> section.title
+                                }
+                                
+                                val hasAnswered = userAssessmentsVm.hasAnsweredCategory(categoryName)
+                                val updatedSection = section.copy(
+                                    answered = if (hasAnswered) section.total else 0
+                                )
+                                
+                                println("DEBUG: MainActivity - Seção '${section.title}' -> categoria '$categoryName' -> respondida: $hasAnswered -> answered: ${updatedSection.answered}")
+                                updatedSection
+                            }
+                            println("DEBUG: MainActivity - Seções atualizadas: $updatedSections")
+                            updatedSections
+                        } else {
+                            println("DEBUG: MainActivity - Estado não carregado, usando sections originais")
+                            sections
+                        }
+                    }
+                }
+                
                 RiskAssessmentScreen(
-                    sections = sections,
+                    sections = apiSections,
                     onSectionClick = { sectionTitle ->
                         // mapeia o tipo de questionário a partir do título
                         val questionnaireType = when (sectionTitle) {

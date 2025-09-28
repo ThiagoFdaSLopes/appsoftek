@@ -43,6 +43,19 @@ fun QuestionaireOptionsNumeric(
     onBackPressed: () -> Unit = {},
     onFinished: (List<String?>) -> Unit = {}
 ) {
+    // Proteção: se a lista estiver vazia, evita acessar índice 0
+    if (questions.isEmpty()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(theme.backgroundColor),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(text = "Nenhuma pergunta disponível.", color = Color.White)
+        }
+        return
+    }
+
     // Current question index and selected answers
     var currentQuestionIndex by remember { mutableStateOf(0) }
     var selectedAnswers by remember { mutableStateOf(List<String?>(questions.size) { null }) }

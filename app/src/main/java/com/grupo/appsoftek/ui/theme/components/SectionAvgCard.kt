@@ -25,6 +25,8 @@ fun SectionAvgCard(
     color: Color,
     modifier: Modifier = Modifier
 ) {
+    val hasData = average > 0.0 && label != "N/A"
+    
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -43,19 +45,32 @@ fun SectionAvgCard(
                 color = Color(0xFF1E3A8A)
             )
 
-            Text(
-                text = String.format("%.1f", average),
-                style = MaterialTheme.typography.headlineMedium.copy(
-                    fontWeight = FontWeight.Bold,
+            if (hasData) {
+                Text(
+                    text = String.format("%.1f", average),
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = color
+                    )
+                )
+
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.bodySmall,
                     color = color
                 )
-            )
+            } else {
+                Text(
+                    text = "📊",
+                    style = MaterialTheme.typography.headlineMedium
+                )
 
-            Text(
-                text = label,
-                style = MaterialTheme.typography.bodySmall,
-                color = color
-            )
+                Text(
+                    text = "Responda o questionário para ver sua pontuação",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color(0xFF6B7280)
+                )
+            }
         }
     }
 }

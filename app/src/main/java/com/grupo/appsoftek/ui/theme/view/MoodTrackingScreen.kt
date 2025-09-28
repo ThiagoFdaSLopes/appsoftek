@@ -60,13 +60,23 @@ fun MoodTrackingScreen(
                 onBack = onBackPressed,
                 onSubmit = {
                     // Salvar as respostas e navegar para a próxima tela
-                    viewModel.saveResponses()
-                    navController?.popBackStack()
-                    Toast.makeText(
-                        navController?.context,
-                        "Respostas sobre bem-estar emocional salvas",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    viewModel.saveResponses(
+                        onSuccess = {
+                            navController?.popBackStack()
+                            Toast.makeText(
+                                context,
+                                "Mood diário enviado com sucesso!",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        },
+                        onError = { errorMessage ->
+                            Toast.makeText(
+                                context,
+                                "Erro: $errorMessage",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    )
                 },
                 isSubmitEnabled = viewModel.isFormComplete
             )

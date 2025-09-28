@@ -1,10 +1,20 @@
 package com.grupo.appsoftek.ui.theme.view
 
+import android.widget.Toast
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.grupo.appsoftek.ui.theme.components.QuestionaireOptionsNumeric
 import com.grupo.appsoftek.ui.theme.viewmodel.QuestionResponseViewModel
+import com.grupo.appsoftek.ui.theme.viewmodel.QuestionsUiState
+import com.grupo.appsoftek.ui.theme.viewmodel.QuestionsViewModel
+import com.grupo.appsoftek.ui.theme.viewmodel.UserAssessmentsViewModel
+import com.grupo.appsoftek.ui.theme.viewmodel.UserAssessmentsUiState
+import com.grupo.appsoftek.data.network.AssessmentAnswerDto
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun QuestionsComunicationScreen(
@@ -13,31 +23,49 @@ fun QuestionsComunicationScreen(
 ) {
     // ViewModel para gerenciar as respostas
     val viewModel: QuestionResponseViewModel = viewModel()
+    val questionsViewModel: QuestionsViewModel = viewModel()
+    val userAssessmentsViewModel: UserAssessmentsViewModel = viewModel()
+    val uiState by questionsViewModel.uiState.collectAsState()
+    val userAssessmentsState by userAssessmentsViewModel.uiState.collectAsState()
+    val context = LocalContext.current
+    val appContext = LocalContext.current.applicationContext
+    
+    LaunchedEffect(Unit) { 
+        questionsViewModel.loadQuestions()
+        userAssessmentsViewModel.loadUserAssessments()
+    }
 
-    // Lista de perguntas de comunicação
-    val climaQuestions = listOf(
-        WorkloadQuestion(
-            "Recebo orientações claras e objetivas sobre minhas atividades e responsabilidades.\n" +
-                    "(Sendo 01 - ruim e 05 - Ótimo)",
-            listOf("1", "2", "3", "4", "5")
-        ),
-        WorkloadQuestion(
-            "Sinto que posso me comunicar abertamente com minha liderança.\n" +
-                    "(Sendo 01 - ruim e 05 - Ótimo)",
-            listOf("1", "2", "3", "4", "5")
-        ),
-        WorkloadQuestion(
-            "As informações importantes circulam de forma eficiente dentro da empresa.. (Sendo 01 - ruim e 05 - Ótimo)",
-            listOf("1", "2", "3", "4", "5")
-        ),
-        WorkloadQuestion(
-            " Tenho clareza sobre as metas e os resultados esperados de mim.. (Sendo 01 - ruim e 05 - Ótimo)",
-            listOf("1", "2", "3", "4", "5")
-        )
-    )
+    // Verificar se o usuário já respondeu este questionário
+    LaunchedEffect(userAssessmentsState) {
+        if (userAssessmentsState is UserAssessmentsUiState.Loaded) {
+            val hasAnswered = userAssessmentsViewModel.hasAnsweredCategory("Comunicação")
+            if (hasAnswered) {
+                Toast.makeText(
+                    context,
+                    "Você já respondeu este questionário!",
+                    Toast.LENGTH_LONG
+                ).show()
+                onBackPressed() // Voltar para a tela anterior
+            }
+        }
+    }
+
+    val remoteQuestions: List<WorkloadQuestion>? = when (uiState) {
+        is QuestionsUiState.Loaded -> {
+            val loaded = (uiState as QuestionsUiState.Loaded).questions
+            val filtered = loaded.filter { it.category.equals("Comunicação", ignoreCase = true) }
+            if (filtered.isNotEmpty()) filtered.map {
+                WorkloadQuestion(
+                    question = it.text,
+                    options = listOf("1", "2", "3", "4", "5")
+                )
+            } else null
+        }
+        else -> null
+    }
 
     // Converter de WorkloadQuestion para Question
-    val questions = climaQuestions.map {
+    val questions = (remoteQuestions ?: emptyList()).map {
         Question(question = it.question, options = it.options)
     }
 
@@ -50,26 +78,50 @@ fun QuestionsComunicationScreen(
         navigationButtonColor = Color(0xFF05285E)   // Azul Softtek para botões
     )
 
-    // Criamos uma função para salvar as respostas no banco de dados
-    // Função que será passada para o onFinished do componente
     val handleFinished = { answers: List<String?> ->
-        // Criar pares de pergunta e resposta
-        val questionsWithAnswers = climaQuestions.mapIndexed { index, question ->
-            question.question to answers.getOrNull(index)
+        val prefs = appContext.getSharedPreferences("auth_prefs", android.content.Context.MODE_PRIVATE)
+        val userId = prefs.getString("current_user_uuid", null)
+        val ui = uiState
+        if (userId != null && ui is QuestionsUiState.Loaded) {
+            val apiMap = ui.questions.filter { it.category.equals("Comunicação", true) }
+                .map { it.text to it }.toMap()
+            val payload = questions.mapIndexedNotNull { index, q ->
+                val value = answers.getOrNull(index) ?: return@mapIndexedNotNull null
+                val dto = apiMap[q.question] ?: return@mapIndexedNotNull null
+                AssessmentAnswerDto(questionId = dto.id, category = dto.category, value = value)
+            }
+            questionsViewModel.submitAssessment(userId, payload) { }
         }
-
-        // Salvar no banco de dados
-        viewModel.saveQuestionnaireResponses("comunicacao", questionsWithAnswers)
-
-        // Chamar a função original onFinished
         onFinished(answers)
     }
 
-    // Usar o componente reutilizável
-    QuestionaireOptionsNumeric(
-        questions = questions,
-        theme = workloadTheme,
-        onBackPressed = onBackPressed,
-        onFinished = handleFinished // Usar nossa nova função que salva e chama onFinished
-    )
+    // Estados de carregamento/vazio
+    when (uiState) {
+        is QuestionsUiState.Loading -> {
+            androidx.compose.material3.CircularProgressIndicator()
+            androidx.compose.material3.Text(text = "Carregando...")
+            return
+        }
+        is QuestionsUiState.Loaded -> {
+            
+            if (questions.isEmpty()) {
+                androidx.compose.material3.Text(text = "Nenhuma pergunta disponível.")
+                return
+            }
+        }
+        is QuestionsUiState.Error -> {
+            // opcional: mensagem de erro
+        }
+        else -> {}
+    }
+
+    // Usar o componente reutilizável apenas se houver perguntas
+    if (questions.isNotEmpty()) {
+        QuestionaireOptionsNumeric(
+            questions = questions,
+            theme = workloadTheme,
+            onBackPressed = onBackPressed,
+            onFinished = handleFinished // Usar nossa nova função que salva e chama onFinished
+        )
+    }
 }

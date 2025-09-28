@@ -1,10 +1,20 @@
 package com.grupo.appsoftek.ui.theme.view
 
+import android.widget.Toast
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.grupo.appsoftek.ui.theme.components.QuestionnaireScreen
 import com.grupo.appsoftek.ui.theme.viewmodel.QuestionResponseViewModel
+import com.grupo.appsoftek.ui.theme.viewmodel.QuestionsUiState
+import com.grupo.appsoftek.ui.theme.viewmodel.QuestionsViewModel
+import com.grupo.appsoftek.ui.theme.viewmodel.UserAssessmentsViewModel
+import com.grupo.appsoftek.ui.theme.viewmodel.UserAssessmentsUiState
+import com.grupo.appsoftek.data.network.AssessmentAnswerDto
+import androidx.compose.ui.platform.LocalContext
 
 // Data class para representar uma pergunta de saúde mental
 data class MentalHealthQuestion(
@@ -19,20 +29,49 @@ fun ProductivityQuestionScreen(
 ) {
     // ViewModel para gerenciar as respostas
     val viewModel: QuestionResponseViewModel = viewModel()
-    // Lista de perguntas sobre saúde mental
-    val mentalHealthQuestions = listOf(
-        MentalHealthQuestion(
-            "Você tem apresentado sintomas como insônia, irritabilidade ou cansaço extremo?",
-            listOf("Nunca", "Raramente", "Às vezes", "Frequentemente", "Sempre")
-        ),
-        MentalHealthQuestion(
-            "Você sente que sua saúde mental prejudica sua produtividade no trabalho?",
-            listOf("Nunca", "Raramente", "Às vezes", "Frequentemente", "Sempre")
-        )
-    )
+    val questionsViewModel: QuestionsViewModel = viewModel()
+    val userAssessmentsViewModel: UserAssessmentsViewModel = viewModel()
+    val uiState by questionsViewModel.uiState.collectAsState()
+    val userAssessmentsState by userAssessmentsViewModel.uiState.collectAsState()
+    val context = LocalContext.current
+    val appContext = LocalContext.current.applicationContext
+    
+    LaunchedEffect(Unit) { 
+        questionsViewModel.loadQuestions()
+        userAssessmentsViewModel.loadUserAssessments()
+    }
+
+    // Verificar se o usuário já respondeu este questionário
+    LaunchedEffect(userAssessmentsState) {
+        if (userAssessmentsState is UserAssessmentsUiState.Loaded) {
+            val hasAnswered = userAssessmentsViewModel.hasAnsweredCategory("Produtividade")
+            if (hasAnswered) {
+                Toast.makeText(
+                    context,
+                    "Você já respondeu este questionário!",
+                    Toast.LENGTH_LONG
+                ).show()
+                onBackPressed() // Voltar para a tela anterior
+            }
+        }
+    }
+
+    val remoteQuestions: List<MentalHealthQuestion>? = when (uiState) {
+        is QuestionsUiState.Loaded -> {
+            val loaded = (uiState as QuestionsUiState.Loaded).questions
+            val filtered = loaded.filter { it.category.equals("Produtividade", ignoreCase = true) }
+            if (filtered.isNotEmpty()) filtered.map {
+                MentalHealthQuestion(
+                    question = it.text,
+                    options = listOf("Nunca", "Raramente", "Às vezes", "Frequentemente", "Sempre")
+                )
+            } else null
+        }
+        else -> null
+    }
 
     // Converter de MentalHealthQuestion para Question
-    val questions = mentalHealthQuestions.map {
+    val questions = (remoteQuestions ?: emptyList()).map {
         Question(question = it.question, options = it.options)
     }
 
@@ -49,26 +88,50 @@ fun ProductivityQuestionScreen(
         navigationButtonColor = Color(0xFF8BB82D)      // Verde para botões de navegação
     )
 
-    // Criamos uma função para salvar as respostas no banco de dados
-    // Função que será passada para o onFinished do componente
     val handleFinished = { answers: List<String?> ->
-        // Criar pares de pergunta e resposta
-        val questionsWithAnswers = questions.mapIndexed { index, question ->
-            question.question to answers.getOrNull(index)
+        val prefs = appContext.getSharedPreferences("auth_prefs", android.content.Context.MODE_PRIVATE)
+        val userId = prefs.getString("current_user_uuid", null)
+        val ui = uiState
+        if (userId != null && ui is QuestionsUiState.Loaded) {
+            val apiMap = ui.questions.filter { it.category.equals("Produtividade", true) }
+                .map { it.text to it }.toMap()
+            val payload = questions.mapIndexedNotNull { index, q ->
+                val value = answers.getOrNull(index) ?: return@mapIndexedNotNull null
+                val dto = apiMap[q.question] ?: return@mapIndexedNotNull null
+                AssessmentAnswerDto(questionId = dto.id, category = dto.category, value = value)
+            }
+            questionsViewModel.submitAssessment(userId, payload) { }
         }
-
-        // Salvar no banco de dados
-        viewModel.saveQuestionnaireResponses("produtividade", questionsWithAnswers)
-
-        // Chamar a função original onFinished
         onFinished(answers)
     }
 
-    // Usar o componente reutilizável
-    QuestionnaireScreen(
-        questions = questions,
-        theme = mentalHealthTheme,
-        onBackPressed = onBackPressed,
-        onFinished = handleFinished
-    )
+    // Estados de carregamento/vazio
+    when (uiState) {
+        is QuestionsUiState.Loading -> {
+            androidx.compose.material3.CircularProgressIndicator()
+            androidx.compose.material3.Text(text = "Carregando...")
+            return
+        }
+        is QuestionsUiState.Loaded -> {
+            
+            if (questions.isEmpty()) {
+                androidx.compose.material3.Text(text = "Nenhuma pergunta disponível.")
+                return
+            }
+        }
+        is QuestionsUiState.Error -> {
+            // opcional: mensagem de erro
+        }
+        else -> {}
+    }
+
+    // Usar o componente reutilizável apenas se houver perguntas
+    if (questions.isNotEmpty()) {
+        QuestionnaireScreen(
+            questions = questions,
+            theme = mentalHealthTheme,
+            onBackPressed = onBackPressed,
+            onFinished = handleFinished
+        )
+    }
 }
