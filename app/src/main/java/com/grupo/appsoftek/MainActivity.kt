@@ -350,12 +350,21 @@ fun AppNavigation() {
                                     "Liderança" -> "Liderança"
                                     else -> section.title
                                 }
-                                
-                                val hasAnswered = userAssessmentsVm.hasAnsweredCategory(categoryName)
-                                val updatedSection = section.copy(
-                                    answered = if (hasAnswered) section.total else 0
-                                )
-                                
+                                // Regra especial: Bem-estar emocional vem do check-in diário (local), não do endpoint de assessments
+                                val updatedSection: com.grupo.appsoftek.ui.theme.view.Section
+                                val hasAnswered: Boolean
+                                if (section.title == "Bem-estar emocional") {
+                                    hasAnswered = section.answered > 0
+                                    updatedSection = section.copy(
+                                        answered = if (hasAnswered) section.total else 0
+                                    )
+                                } else {
+                                    hasAnswered = userAssessmentsVm.hasAnsweredCategory(categoryName)
+                                    updatedSection = section.copy(
+                                        answered = if (hasAnswered) section.total else 0
+                                    )
+                                }
+
                                 println("DEBUG: MainActivity - Seção '${section.title}' -> categoria '$categoryName' -> respondida: $hasAnswered -> answered: ${updatedSection.answered}")
                                 updatedSection
                             }
