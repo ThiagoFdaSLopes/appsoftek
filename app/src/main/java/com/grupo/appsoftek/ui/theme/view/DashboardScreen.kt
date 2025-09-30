@@ -201,6 +201,16 @@ fun DashboardScreen(
                                 label = liderancaData?.status ?: "N/A",
                                 color = liderancaData?.let { dashboardVm.getStatusColor(it.status) } ?: Color.Gray
                             )
+
+                            // Card 5: Comunicação
+                            val comunicacaoData = dashboardVm.getCategoryData("Comunicação", categoryStatuses)
+                            SectionAvgCard(
+                                modifier = Modifier.weight(1f),
+                                title = "Comunicação",
+                                average = comunicacaoData?.percentage?.toDouble() ?: 0.0,
+                                label = comunicacaoData?.status ?: "N/A",
+                                color = comunicacaoData?.let { dashboardVm.getStatusColor(it.status) } ?: Color.Gray
+                            )
                         }
                     }
                 }
