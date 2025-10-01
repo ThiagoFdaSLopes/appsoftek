@@ -65,6 +65,8 @@ import com.grupo.appsoftek.ui.theme.viewmodel.AuthState
 import com.grupo.appsoftek.ui.theme.viewmodel.QuestionResponseViewModel
 import com.grupo.appsoftek.ui.theme.viewmodel.UserAssessmentsViewModel
 import com.grupo.appsoftek.ui.theme.viewmodel.UserAssessmentsUiState
+import com.grupo.appsoftek.ui.theme.viewmodel.AssessmentsViewModel
+import com.grupo.appsoftek.ui.theme.viewmodel.CanAnswerState
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -131,6 +133,9 @@ fun AppNavigation() {
     val userAssessmentsVm: UserAssessmentsViewModel = viewModel()
     val userAssessmentsState by userAssessmentsVm.uiState.collectAsState()
 
+    val assessmentsVm: AssessmentsViewModel = viewModel()
+    val canAnswerState by assessmentsVm.canAnswerState.collectAsState()
+
     val scope = rememberCoroutineScope()
 
     // Carregar dados dos assessments quando a tela for criada
@@ -145,6 +150,34 @@ fun AppNavigation() {
         if (currentRoute == Screen.Assessment.route) {
             println("DEBUG: MainActivity - Recarregando dados para tela de assessment")
             userAssessmentsVm.loadUserAssessments()
+        }
+    }
+
+    // Observar mudanças no canAnswerState e mostrar mensagem ou navegar
+    LaunchedEffect(canAnswerState) {
+        when (val state = canAnswerState) {
+            is CanAnswerState.Success -> {
+                if (!state.data.canAnswer) {
+                    // Mostrar Toast com a mensagem do backend
+                    Toast.makeText(
+                        navController.context,
+                        state.data.message,
+                        Toast.LENGTH_LONG
+                    ).show()
+                    // Resetar o estado para evitar mostrar a mensagem repetidamente
+                    assessmentsVm.resetState()
+                }
+                // Se canAnswer for true, a navegação já foi feita no onSectionClick
+            }
+            is CanAnswerState.Error -> {
+                Toast.makeText(
+                    navController.context,
+                    "Erro ao verificar disponibilidade: ${state.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
+                assessmentsVm.resetState()
+            }
+            else -> { /* Idle ou Loading, não fazer nada */ }
         }
     }
 
@@ -380,40 +413,61 @@ fun AppNavigation() {
                 RiskAssessmentScreen(
                     sections = apiSections,
                     onSectionClick = { sectionTitle ->
-                        // mapeia o tipo de questionário a partir do título
-                        val questionnaireType = when (sectionTitle) {
-                            "Bem-estar emocional" -> "mood_tracking"
-                            "Carga de trabalho" -> "carga-de-trabalho"
-                            "Produtividade" -> "produtividade"
-                            "Clima" -> "clima"
-                            "Comunicação" -> "comunicacao"
-                            "Liderança" -> "liderança"
-                            else -> ""
-                        }
-                        // checa e navega ou mostra Toast
-                        scope.launch {
-                            if (qrVm.hasAnsweredToday(questionnaireType)) {
-                                Toast.makeText(
-                                    navController.context,
-                                    "Você já respondeu '$sectionTitle' hoje.",
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                        // Verificar se é um questionário que precisa de validação canAnswer
+                        val isQuestionnaire = sectionTitle in listOf(
+                            "Carga de trabalho",
+                            "Produtividade",
+                            "Clima",
+                            "Comunicação",
+                            "Liderança"
+                        )
+
+                        if (isQuestionnaire) {
+                            // Verificar se pode responder antes de navegar
+                            scope.launch {
+                                assessmentsVm.checkCanAnswer()
+                                // Aguardar resposta do backend
+                                assessmentsVm.canAnswerState.collect { state ->
+                                    if (state is CanAnswerState.Success && state.data.canAnswer) {
+                                        // Pode responder, navegar
+                                        when (sectionTitle) {
+                                            "Carga de trabalho" -> navController.navigate(Screen.WorkloadQuestions.route)
+                                            "Produtividade" -> navController.navigate(Screen.ProductivityQuestions.route)
+                                            "Clima" -> navController.navigate(Screen.ClimaQuestionsScreen.route)
+                                            "Comunicação" -> navController.navigate(Screen.QuestionsComunicationScreen.route)
+                                            "Liderança" -> navController.navigate(Screen.QuestionsLeadersheapScreen.route)
+                                        }
+                                    }
+                                    // Se não pode responder, o LaunchedEffect mostrará o Toast
+                                }
+                            }
+                        } else {
+                            // Para bem-estar emocional e outras rotas, manter lógica anterior
+                            val questionnaireType = when (sectionTitle) {
+                                "Bem-estar emocional" -> "mood_tracking"
+                                else -> ""
+                            }
+                            
+                            if (sectionTitle == "Bem-estar emocional") {
+                                scope.launch {
+                                    if (qrVm.hasAnsweredToday(questionnaireType)) {
+                                        Toast.makeText(
+                                            navController.context,
+                                            "Você já respondeu '$sectionTitle' hoje.",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    } else {
+                                        navController.navigate(Screen.BemEstarEmocional.route)
+                                    }
+                                }
                             } else {
-                                // só navega se ainda não respondeu
+                                // Outras navegações (Dashboard, Apoio, etc)
                                 when (sectionTitle) {
                                     "Dashboard" -> navController.navigate(Screen.Dashboard.route)
-                                    "Carga de trabalho" -> navController.navigate(Screen.WorkloadQuestions.route)
-                                    "Produtividade" -> navController.navigate(Screen.ProductivityQuestions.route)
-                                    "Clima" -> navController.navigate(Screen.ClimaQuestionsScreen.route)
-                                    "Comunicação" -> navController.navigate(Screen.QuestionsComunicationScreen.route)
-                                    "Liderança" -> navController.navigate(Screen.QuestionsLeadersheapScreen.route)
                                     "Apoio" -> navController.navigate(Screen.Support.route)
                                     "Notificações" -> navController.navigate(Screen.Resources.route)
-                                    "Bem-estar emocional" -> navController.navigate(Screen.BemEstarEmocional.route)
                                     else -> navController.navigate(
-                                        Screen.SectionDetail.createRoute(
-                                            sectionTitle
-                                        )
+                                        Screen.SectionDetail.createRoute(sectionTitle)
                                     )
                                 }
                             }
